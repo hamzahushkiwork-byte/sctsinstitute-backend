@@ -1,23 +1,19 @@
 import express from 'express';
+import path from 'path';
+import multer from 'multer';
+import { existsSync, mkdirSync } from 'fs';
 import * as adminController from '../../controllers/admin.controller.js';
 import authMiddleware from '../../middlewares/auth.middleware.js';
 import partnersAdminRoutes from '../admin/partners.routes.js';
 import servicesAdminRoutes from '../admin/services.routes.js';
 import certificationAdminRoutes from '../admin/certification.admin.routes.js';
 import coursesAdminRoutes from '../admin/courses.admin.routes.js';
-import multer from 'multer';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
 import config from '../../config/env.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const router = express.Router();
 
-// Ensure uploads directory exists
-const uploadDir = join(__dirname, '../../../', config.uploadDir);
+// Ensure uploads directory exists (repo root - same path used by static middleware)
+const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
 if (!existsSync(uploadDir)) {
   mkdirSync(uploadDir, { recursive: true });
 }
@@ -63,7 +59,7 @@ const upload = multer({
 });
 
 // Configure multer specifically for partner logos (images only, smaller size)
-const partnersUploadDir = join(uploadDir, 'partners');
+const partnersUploadDir = path.join(uploadDir, 'partners');
 if (!existsSync(partnersUploadDir)) {
   mkdirSync(partnersUploadDir, { recursive: true });
 }

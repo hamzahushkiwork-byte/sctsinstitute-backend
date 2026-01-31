@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
@@ -51,25 +52,10 @@ app.use(
 );
 
 /**
- * Debug endpoint to check headers
+ * Serve uploads as static files - MUST be before API routes and 404 handler
+ * Use process.cwd() for Render compatibility
  */
-app.get("/__headers", (req, res) => {
-  const headers = {
-    "Access-Control-Allow-Origin": res.getHeader("Access-Control-Allow-Origin"),
-    "Cross-Origin-Resource-Policy": res.getHeader("Cross-Origin-Resource-Policy"),
-    "Cross-Origin-Embedder-Policy": res.getHeader("Cross-Origin-Embedder-Policy"),
-    "Request-Origin": req.get("origin"),
-    "CORS-Origin-Config": config.corsOrigin,
-  };
-  res.json(headers);
-});
-
-/**
- * Serve uploads with explicit CORS headers
- * - Must support Range for mp4 (206)
- * - MUST be before API routes to handle OPTIONS correctly
- */
-const uploadDir = join(__dirname, "..", config.uploadDir || "uploads");
+const uploadDir = path.join(process.cwd(), config.uploadDir || "uploads");
 
 // Handle OPTIONS preflight requests for uploads
 // CORS middleware handles most OPTIONS, but we add explicit handler for uploads path
@@ -107,7 +93,7 @@ app.use(
     next();
   },
   express.static(uploadDir, {
-    setHeaders: (res, path) => {
+    setHeaders: (res, filePath) => {
       // CRITICAL: Set CORS headers in setHeaders callback
       // This ensures headers are set on every file response, even cached ones
       const origin = config.corsOrigin || "http://localhost:5173";
@@ -121,6 +107,20 @@ app.use(
     },
   })
 );
+
+/**
+ * Debug endpoint to check headers
+ */
+app.get("/__headers", (req, res) => {
+  const headers = {
+    "Access-Control-Allow-Origin": res.getHeader("Access-Control-Allow-Origin"),
+    "Cross-Origin-Resource-Policy": res.getHeader("Cross-Origin-Resource-Policy"),
+    "Cross-Origin-Embedder-Policy": res.getHeader("Cross-Origin-Embedder-Policy"),
+    "Request-Origin": req.get("origin"),
+    "CORS-Origin-Config": config.corsOrigin,
+  };
+  res.json(headers);
+});
 
 /**
  * API routes

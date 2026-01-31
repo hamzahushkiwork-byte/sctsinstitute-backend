@@ -1,15 +1,10 @@
 import multer from 'multer';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import path from 'path';
 import { existsSync, mkdirSync } from 'fs';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Get project root (backend folder)
-const projectRoot = join(__dirname, '../..');
-const uploadsDir = join(projectRoot, 'uploads');
-const partnersDir = join(uploadsDir, 'partners');
+// Use process.cwd() for Render compatibility - same as static middleware
+const uploadsDir = path.join(process.cwd(), 'uploads');
+const partnersDir = path.join(uploadsDir, 'partners');
 
 // Ensure directories exist
 if (!existsSync(uploadsDir)) {

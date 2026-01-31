@@ -1,5 +1,7 @@
 // backend/src/server.js
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
@@ -7,6 +9,11 @@ import { dirname, join } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Ensure uploads folder exists on startup (repo root: backend/uploads)
+const uploadRoot = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadRoot)) {
+  fs.mkdirSync(uploadRoot, { recursive: true });
+}
 
 // Load .env explicitly from backend root
 const envPath = join(__dirname, "..", ".env");

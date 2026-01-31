@@ -1,3 +1,4 @@
+import path from 'path';
 import { ok, fail } from '../../utils/response.js';
 import Course from '../../models/Course.model.js';
 import { fileURLToPath } from 'url';
@@ -221,7 +222,7 @@ export async function updateCourse(req, res) {
           ? oldUrl.replace('/uploads/', '')
           : oldUrl;
         
-        const uploadDir = join(__dirname, '../../..', config.uploadDir || 'uploads');
+        const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
         const filePath = join(uploadDir, imagePath);
         
         if (existsSync(filePath)) {
@@ -289,7 +290,7 @@ export async function deleteCourse(req, res) {
           ? imageUrl.replace('/uploads/', '')
           : imageUrl;
         
-        const uploadDir = join(__dirname, '../../..', config.uploadDir || 'uploads');
+        const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
         const filePath = join(uploadDir, imagePath);
         
         if (existsSync(filePath)) {

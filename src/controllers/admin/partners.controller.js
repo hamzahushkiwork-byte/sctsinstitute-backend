@@ -1,3 +1,4 @@
+import path from 'path';
 import { ok, fail } from '../../utils/response.js';
 import Partner from '../../models/Partner.model.js';
 import { fileURLToPath } from 'url';
@@ -153,7 +154,7 @@ export async function updatePartner(req, res) {
             ? existingPartner.logoUrl.replace('/uploads/', '')
             : existingPartner.logoUrl;
           
-          const uploadDir = join(__dirname, '../../..', config.uploadDir || 'uploads');
+          const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
           const filePath = join(uploadDir, logoPath);
           
           if (existsSync(filePath)) {
@@ -227,7 +228,7 @@ export async function deletePartner(req, res) {
           ? partner.logoUrl.replace('/uploads/', '')
           : partner.logoUrl;
         
-        const uploadDir = join(__dirname, '../../..', config.uploadDir || 'uploads');
+        const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
         const filePath = join(uploadDir, logoPath);
         
         if (existsSync(filePath)) {
