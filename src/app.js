@@ -127,6 +127,18 @@ app.use(
  */
 app.use("/api", routes);
 
+/**
+ * Root endpoint - health/status
+ */
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    service: "sctsinstitute-backend",
+    message: "API is running",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
