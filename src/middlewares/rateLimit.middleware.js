@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 /**
  * Rate limiter for registration endpoint
@@ -14,10 +14,7 @@ export const registerRateLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  // Use IP address from request
-  keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress || 'unknown';
-  },
+  keyGenerator: (req, res) => ipKeyGenerator(req, res),
   // Custom handler for rate limit exceeded
   handler: (req, res) => {
     res.status(429).json({
