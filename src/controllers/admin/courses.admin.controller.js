@@ -16,12 +16,12 @@ const __dirname = dirname(__filename);
  */
 export async function listCourses(req, res) {
   try {
-    const { availability } = req.query;
+    const { status } = req.query;
     let query = {};
 
-    if (availability === 'available') {
+    if (status === 'available') {
       query.isAvailable = true;
-    } else if (availability === 'unavailable') {
+    } else if (status === 'coming-soon') {
       query.isAvailable = false;
     }
 

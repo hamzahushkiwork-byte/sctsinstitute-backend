@@ -8,17 +8,15 @@ import Course from '../../models/Course.model.js';
  */
 export async function getActiveCourses(req, res) {
   try {
-    const { availability } = req.query;
+    const { status } = req.query;
     let query = { isActive: true };
 
-    // Default behavior: return only available courses
-    if (availability === 'all') {
-      // Don't add isAvailable filter
-    } else if (availability === 'unavailable') {
-      query.isAvailable = false;
-    } else {
-      // Default or availability=available
+    // Status filter: available | coming-soon | all
+    // Default behavior: return all active courses
+    if (status === 'available') {
       query.isAvailable = true;
+    } else if (status === 'coming-soon') {
+      query.isAvailable = false;
     }
 
     const courses = await Course.find(query)

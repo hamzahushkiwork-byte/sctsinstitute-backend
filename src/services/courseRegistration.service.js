@@ -14,7 +14,7 @@ export async function registerForCourse(courseId, userId) {
 
   // Check if course is available
   if (course.isAvailable === false) {
-    throw new Error('This course is currently not available for registration');
+    throw new Error('This course is coming soon and not yet available for registration');
   }
 
   // Check if user exists
