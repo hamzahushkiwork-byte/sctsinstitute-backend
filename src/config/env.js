@@ -5,7 +5,9 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-dotenv.config({ path: join(__dirname, '..', '..', '.env') });
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: join(__dirname, '..', '..', '.env') });
+}
 
 const required = ['MONGODB_URI'];
 for (const key of required) {

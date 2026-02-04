@@ -152,12 +152,7 @@ app.get("/health", (req, res) => {
  * Root endpoint - health/status
  */
 app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    service: "sctsinstitute-backend",
-    message: "API is running",
-    timestamp: new Date().toISOString(),
-  });
+  res.status(200).json({ ok: true, service: "sctsinstitute-backend" });
 });
 
 app.use(notFoundMiddleware);

@@ -15,9 +15,14 @@ if (!fs.existsSync(uploadRoot)) {
   fs.mkdirSync(uploadRoot, { recursive: true });
 }
 
-// Load .env explicitly from backend root
-const envPath = join(__dirname, "..", ".env");
-dotenv.config({ path: envPath });
+// Load .env only in development/local environments
+let envPath = "";
+if (process.env.NODE_ENV !== "production") {
+  envPath = join(__dirname, "..", ".env");
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+  }
+}
 
 
 if (process.env.NODE_ENV === "development") {
@@ -35,7 +40,7 @@ import config from "./config/env.js";
 import { connectDB } from "./config/db.js";
 
 
-const PORT = config.port;
+const PORT = process.env.PORT || config.port || 8080;
 
 
 async function startServer() {
