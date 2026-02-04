@@ -40,18 +40,43 @@ app.use(express.urlencoded({ extended: true }));
 // Multer will handle multipart requests in specific routes
 
 /**
- * CORS (API)
+ * CORS Configuration
  */
-const corsOrigin = (process.env.CORS_ORIGIN || "http://localhost:5173").replace(/\/$/, "");
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://sctsinstitute.com",
+  "https://www.sctsinstitute.com",
+];
 
-app.use(
-  cors({
-    origin: corsOrigin,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// Add CORS_ORIGIN from env if present (handles comma-separated lists)
+if (process.env.CORS_ORIGIN) {
+  process.env.CORS_ORIGIN.split(",").forEach((origin) => {
+    const trimmed = origin.trim().replace(/\/$/, "");
+    if (trimmed && !allowedOrigins.includes(trimmed)) {
+      allowedOrigins.push(trimmed);
+    }
+  });
+}
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes("*")) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked for origin: ${origin}`);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors(corsOptions));
 
 /**
  * Serve uploads as static files - MUST be before API routes and 404 handler
@@ -59,31 +84,22 @@ app.use(
  */
 const uploadDir = path.join(process.cwd(), config.uploadDir || "uploads");
 
-// Handle OPTIONS preflight requests for uploads
-// CORS middleware handles most OPTIONS, but we add explicit handler for uploads path
-app.use("/uploads", (req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    res.setHeader("Access-Control-Allow-Origin", config.corsOrigin || "http://localhost:5173");
-    res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Range");
-    res.setHeader("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges");
-    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-    res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-    return res.sendStatus(204);
-  }
-  next();
-});
-
 // Serve static uploads with CORS headers
 app.use(
   "/uploads",
   (req, res, next) => {
-    // Set CORS headers for every request
-    const origin = config.corsOrigin || "http://localhost:5173";
-    res.setHeader("Access-Control-Allow-Origin", origin);
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+      res.setHeader("Access-Control-Allow-Origin", origin || "*");
+    } else if (!origin && allowedOrigins.length > 0) {
+      // Default to first allowed origin for non-browser requests if needed, 
+      // or just don't set it. Browsers will send Origin.
+    }
+
     res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Range");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Range, Authorization");
     res.setHeader("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
 
     // Cross-Origin Resource Policy headers
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
@@ -92,19 +108,15 @@ app.use(
     // Support Range requests for video streaming (206 Partial Content)
     res.setHeader("Accept-Ranges", "bytes");
 
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
     next();
   },
   express.static(uploadDir, {
-    setHeaders: (res, filePath) => {
-      // CRITICAL: Set CORS headers in setHeaders callback
-      // This ensures headers are set on every file response, even cached ones
-      const origin = config.corsOrigin || "http://localhost:5173";
-      res.setHeader("Access-Control-Allow-Origin", origin);
-      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-      res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-      res.setHeader("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges");
-
-      // Caching
+    setHeaders: (res, filePath, stat) => {
+      // Set headers on the response object directly
+      // Note: Access-Control-Allow-Origin is already set by middleware above
       res.setHeader("Cache-Control", "public, max-age=3600");
     },
   })
