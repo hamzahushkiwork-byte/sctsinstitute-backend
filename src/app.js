@@ -1,10 +1,12 @@
 import express from "express";
+import fs from "fs";
 import path from "path";
 import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import swaggerUi from "swagger-ui-express";
 import routes from "./routes/index.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import notFoundMiddleware from "./middlewares/notfound.middleware.js";
@@ -154,6 +156,25 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => {
   res.status(200).json({ ok: true, service: "sctsinstitute-backend" });
 });
+
+// ===== Swagger (NON-BREAKING ADDON) START =====
+app.set("trust proxy", 1);
+const openApiPath = join(__dirname, "..", "docs", "openapi.json");
+app.get("/openapi.json", (req, res) => {
+  const baseUrl =
+    (process.env.PUBLIC_BASE_URL || "").trim().replace(/\/$/, "") ||
+    `${req.get("x-forwarded-proto") || req.protocol}://${req.get("x-forwarded-host") || req.get("host")}` ||
+    `http://localhost:${process.env.PORT || 8080}`;
+  let spec = {};
+  if (fs.existsSync(openApiPath)) {
+    spec = JSON.parse(fs.readFileSync(openApiPath, "utf8"));
+  }
+  spec.servers = [{ url: baseUrl, description: "API Server" }];
+  res.setHeader("Content-Type", "application/json");
+  res.send(JSON.stringify(spec));
+});
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(null, { swaggerOptions: { url: "/openapi.json" } }));
+// ===== Swagger (NON-BREAKING ADDON) END =====
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

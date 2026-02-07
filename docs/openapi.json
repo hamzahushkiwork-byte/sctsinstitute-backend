@@ -1,0 +1,68 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "SCTS Institute API",
+        "version": "1.0.0",
+        "description": "API documentation effectively served from the backend."
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Local server"
+        }
+    ],
+    "paths": {
+        "/health": {
+            "get": {
+                "summary": "Health Check",
+                "description": "Verifies that the server is running.",
+                "responses": {
+                    "200": {
+                        "description": "Server is healthy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        },
+                                        "timestamp": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/": {
+            "get": {
+                "summary": "Root Endpoint",
+                "responses": {
+                    "200": {
+                        "description": "Welcome message",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "ok": {
+                                            "type": "boolean"
+                                        },
+                                        "service": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
