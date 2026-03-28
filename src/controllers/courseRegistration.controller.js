@@ -6,7 +6,7 @@ import * as courseRegistrationService from '../services/courseRegistration.servi
  */
 export async function registerForCourse(req, res) {
   try {
-    const { courseId } = req.body;
+    const { courseId, sessionDateKey } = req.body;
     const userId = req.user?.userId; // From auth middleware
 
     if (!userId) {
@@ -17,7 +17,11 @@ export async function registerForCourse(req, res) {
       return fail(res, 400, 'Course ID is required');
     }
 
-    const registration = await courseRegistrationService.registerForCourse(courseId, userId);
+    const registration = await courseRegistrationService.registerForCourse(
+      courseId,
+      userId,
+      sessionDateKey,
+    );
     return ok(res, registration, 'Successfully registered for course', null, 201);
   } catch (error) {
     if (error.message === 'Course not found' || error.message === 'User not found') {
@@ -25,6 +29,12 @@ export async function registerForCourse(req, res) {
     }
     if (error.message === 'User is already registered for this course') {
       return fail(res, 409, error.message);
+    }
+    if (
+      error.message === 'Invalid session date format' ||
+      error.message === 'Session date is outside this course schedule window'
+    ) {
+      return fail(res, 400, error.message);
     }
     return fail(res, 500, error.message || 'Failed to register for course');
   }

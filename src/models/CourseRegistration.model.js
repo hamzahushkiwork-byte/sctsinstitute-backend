@@ -26,6 +26,12 @@ const courseRegistrationSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    /** YYYY-MM-DD — session day chosen on the public calendar (optional). */
+    sessionDateKey: {
+      type: String,
+      trim: true,
+      default: '',
+    },
   },
   {
     timestamps: true,

@@ -2,10 +2,53 @@ import CourseRegistration from '../models/CourseRegistration.model.js';
 import Course from '../models/Course.model.js';
 import User from '../models/User.model.js';
 
+const SESSION_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function utcDayKeyFromValue(item) {
+  if (item == null) return null;
+  const d = item instanceof Date ? item : new Date(item);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
+/** Sorted YYYY-MM-DD keys from course.availableDates, or null if none. */
+function courseScheduleKeys(course) {
+  const raw = course?.availableDates;
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  const keys = new Set();
+  for (const item of raw) {
+    const k = utcDayKeyFromValue(item);
+    if (k) keys.add(k);
+  }
+  if (keys.size === 0) return null;
+  return [...keys].sort();
+}
+
+function normalizeSessionDateKey(sessionDateKey, course) {
+  const raw = sessionDateKey == null ? '' : String(sessionDateKey).trim();
+  if (!raw) return '';
+
+  if (!SESSION_KEY_RE.test(raw)) {
+    throw new Error('Invalid session date format');
+  }
+
+  const schedule = courseScheduleKeys(course);
+  if (schedule && schedule.length > 0) {
+    const minK = schedule[0];
+    const maxK = schedule[schedule.length - 1];
+    if (raw < minK || raw > maxK) {
+      throw new Error('Session date is outside this course schedule window');
+    }
+  }
+
+  return raw;
+}
+
 /**
  * Register a user for a course
+ * @param {string} sessionDateKey - optional YYYY-MM-DD within course schedule range
  */
-export async function registerForCourse(courseId, userId) {
+export async function registerForCourse(courseId, userId, sessionDateKey = '') {
   // Check if course exists
   const course = await Course.findById(courseId);
   if (!course) {
@@ -33,11 +76,14 @@ export async function registerForCourse(courseId, userId) {
     throw new Error('User is already registered for this course');
   }
 
+  const key = normalizeSessionDateKey(sessionDateKey, course);
+
   // Create registration
   const registration = await CourseRegistration.create({
     courseId,
     userId,
     status: 'pending',
+    sessionDateKey: key,
   });
 
   // Populate course and user details
