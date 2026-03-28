@@ -41,6 +41,11 @@ const courseSchema = new mongoose.Schema(
       default: true,
       required: true,
     },
+    /** Session dates shown on public course calendar (ISO stored as Date @ UTC noon). */
+    availableDates: {
+      type: [Date],
+      default: [],
+    },
   },
   {
     timestamps: true,

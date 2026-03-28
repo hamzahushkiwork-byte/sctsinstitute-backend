@@ -7,6 +7,7 @@ import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import config from '../../config/env.js';
 import { slugify, generateUniqueSlug } from '../../utils/slug.js';
+import { parseAvailableDatesFromRequest } from '../../utils/courseAvailableDates.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -75,6 +76,11 @@ export async function createCourse(req, res) {
     const isActive = req.body.isActive === 'true' || req.body.isActive === true || req.body.isActive === undefined;
     const isAvailable = req.body.isAvailable === 'true' || req.body.isAvailable === true || req.body.isAvailable === undefined;
 
+    const { dates: initialAvailableDates } = parseAvailableDatesFromRequest(
+      req.body.availableDates,
+    );
+    const availableDates = initialAvailableDates ?? [];
+
     // Validate required fields
     if (!title) {
       return fail(res, 400, 'title is required');
@@ -123,6 +129,7 @@ export async function createCourse(req, res) {
       sortOrder,
       isActive,
       isAvailable,
+      availableDates,
     };
 
     // Only add imageUrl if we have a file
@@ -231,6 +238,13 @@ export async function updateCourse(req, res) {
 
     if (isAvailable !== undefined) {
       updateData.isAvailable = isAvailable;
+    }
+
+    const { dates: parsedAvailableDates } = parseAvailableDatesFromRequest(
+      req.body.availableDates,
+    );
+    if (parsedAvailableDates !== undefined) {
+      updateData.availableDates = parsedAvailableDates;
     }
 
     // Helper function to delete old file
