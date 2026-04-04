@@ -1,5 +1,20 @@
 # Railway Deployment Guide
 
+## MongoDB Atlas + Railway: Fix 500 Errors / Connection Timeout
+
+**If you see `MongoServerSelectionError: Socket 'secureConnect' timed out` or 500 errors on API routes**, Railway cannot reach MongoDB Atlas. Fix it in Atlas:
+
+1. Go to [MongoDB Atlas](https://cloud.mongodb.com/) → your project → **Network Access** (left sidebar).
+2. Click **Add IP Address**.
+3. Click **Allow Access from Anywhere** (adds `0.0.0.0/0`).
+4. Click **Confirm**.
+5. Wait 1–2 minutes for the rule to apply.
+6. In Railway, redeploy the service (or it will reconnect automatically).
+
+Railway uses dynamic IPs, so you must allow all IPs (`0.0.0.0/0`) for Atlas to accept connections. Your database remains protected by username/password in `MONGODB_URI`.
+
+---
+
 ## Deployment Steps
 1. **Push your changes** to your GitHub repository.
 2. **Link Railway to your Repository**:
