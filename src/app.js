@@ -166,7 +166,7 @@ app.get("/test-email", async (req, res) => {
   if (!to) {
     return res.status(400).json({
       ok: false,
-      error: 'Add query param: ?to=your-email@example.com',
+      error: 'Add query param: ?to=hushkihamza9@gmail.com',
     });
   }
   const secret = process.env.TEST_EMAIL_SECRET;
