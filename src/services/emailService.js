@@ -117,3 +117,28 @@ export async function sendWelcomeEmail({ to, name }) {
     return false;
   }
 }
+
+/**
+ * Send a one-off test message (for GET /test-email).
+ * @param {{ to: string }} params
+ * @returns {Promise<{ ok: true, messageId?: string } | { ok: false, error: string }>}
+ */
+export async function sendTestEmail({ to }) {
+  if (!config.emailHost || !config.emailUser || !config.emailPass) {
+    return { ok: false, error: 'Email configuration missing (EMAIL_HOST, EMAIL_USER, EMAIL_PASS)' };
+  }
+  try {
+    const transporter = createTransporter();
+    const info = await transporter.sendMail({
+      from: config.emailFrom || config.emailUser,
+      to,
+      subject: 'Test email — SCTS Institute',
+      text: 'If you received this, SMTP is configured correctly.\n\nإذا وصلك هذا الإيميل فكل شي تمام 🎉',
+      html: '<p>If you received this, SMTP is configured correctly.</p><p>إذا وصلك هذا الإيميل فكل شي تمام 🎉</p>',
+    });
+    return { ok: true, messageId: info.messageId };
+  } catch (err) {
+    console.error('sendTestEmail failed:', err.message);
+    return { ok: false, error: err.message || 'sendMail failed' };
+  }
+}

@@ -11,6 +11,7 @@ import routes from "./routes/index.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import notFoundMiddleware from "./middlewares/notfound.middleware.js";
 import config from "./config/env.js";
+import { sendTestEmail } from "./services/emailService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -156,6 +157,42 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => {
   res.status(200).json({ ok: true, service: "sctsinstitute-backend" });
 });
+
+// ===== Test email (SMTP check) START =====
+// GET /test-email?to=you@example.com
+// In production, also: &secret=YOUR_TEST_EMAIL_SECRET (set TEST_EMAIL_SECRET in env)
+app.get("/test-email", async (req, res) => {
+  const to = typeof req.query.to === "string" ? req.query.to.trim() : "";
+  if (!to) {
+    return res.status(400).json({
+      ok: false,
+      error: 'Add query param: ?to=your-email@example.com',
+    });
+  }
+  const secret = process.env.TEST_EMAIL_SECRET;
+  if (config.nodeEnv === "production") {
+    if (!secret) {
+      return res.status(403).json({
+        ok: false,
+        error: "Test route disabled in production (set TEST_EMAIL_SECRET to enable).",
+      });
+    }
+    if (req.query.secret !== secret) {
+      return res.status(403).json({ ok: false, error: "Invalid or missing secret query param." });
+    }
+  }
+  const result = await sendTestEmail({ to });
+  if (result.ok) {
+    return res.status(200).json({
+      ok: true,
+      message: "Email sent",
+      messageId: result.messageId,
+      to,
+    });
+  }
+  return res.status(500).json({ ok: false, error: result.error });
+});
+// ===== Test email (SMTP check) END =====
 
 // ===== Swagger (NON-BREAKING ADDON) START =====
 app.set("trust proxy", 1);
