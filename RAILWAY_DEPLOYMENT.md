@@ -29,7 +29,9 @@ Railway uses dynamic IPs, so you must allow all IPs (`0.0.0.0/0`) for Atlas to a
    - `CORS_ORIGIN`: Your frontend URL (e.g., `https://your-frontend-domain.up.railway.app`).
    - `JWT_ACCESS_SECRET`: A secure random string.
    - `JWT_REFRESH_SECRET`: A secure random string.
-   - `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM`, `FRONTEND_URL` — **required for signup welcome emails** (Hostinger: port `465` + `EMAIL_SECURE=true`, or port `587` + `EMAIL_SECURE=false`).
+   - `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM`, `FRONTEND_URL` — **required for signup welcome emails** (Hostinger-style: port `465` + `EMAIL_SECURE=true`, or port `587` + `EMAIL_SECURE=false` with STARTTLS).
+   - `FRONTEND_URL`: Public site URL used in the welcome email sign-in link (must match your deployed frontend).
+   - `TEST_EMAIL_SECRET` (optional): If set in production, enables `GET /test-email?to=you@example.com&secret=<value>` for SMTP smoke tests. If unset in production, `/test-email` returns 403.
 4. **Networking**:
    - Go to **Service > Settings > Domains**.
    - Click **Generate Domain**.
@@ -45,3 +47,9 @@ Confirm the following endpoints work:
 Check the Railway logs for:
 - `🚀 Server running on port 8080`
 - `✅ MongoDB connected`
+- After signup: `Welcome email sent successfully:` or `Email configuration missing. Cannot send welcome email.` / `Failed to send welcome email:`
+
+## SMTP smoke test (optional)
+After setting all `EMAIL_*` variables, redeploy, then:
+- **Development**: `GET https://<backend>/test-email?to=your@email.com`
+- **Production**: same URL plus `&secret=<TEST_EMAIL_SECRET>` when `TEST_EMAIL_SECRET` is set.

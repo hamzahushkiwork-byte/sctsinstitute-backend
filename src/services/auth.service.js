@@ -1,6 +1,16 @@
+import crypto from 'crypto';
 import User from '../models/User.model.js';
+import PasswordResetOtp from '../models/PasswordResetOtp.model.js';
 import bcrypt from 'bcrypt';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
+import { sendPasswordResetOtpEmail } from './emailService.js';
+
+const OTP_EXPIRY_MS = 15 * 60 * 1000;
+const MAX_OTP_ATTEMPTS = 5;
+
+function generateSixDigitOtp() {
+  return String(crypto.randomInt(100000, 1000000));
+}
 
 export async function login(data) {
   const { email, password } = data;
@@ -136,4 +146,79 @@ export async function logout(data) {
   return {
     message: 'Logged out successfully',
   };
+}
+
+/**
+ * Create OTP and send email if user exists. Caller should always return a generic success message.
+ * @returns {{ emailSent: boolean, userFound: boolean }}
+ */
+export async function requestPasswordReset(email) {
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await User.findOne({ email: normalizedEmail });
+  if (!user) {
+    return { emailSent: false, userFound: false };
+  }
+
+  const otp = generateSixDigitOtp();
+  const otpHash = await bcrypt.hash(otp, 10);
+  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MS);
+
+  await PasswordResetOtp.findOneAndUpdate(
+    { email: normalizedEmail },
+    { $set: { otpHash, expiresAt, attempts: 0 } },
+    { upsert: true }
+  );
+
+  const name = [user.firstName, user.lastName].filter(Boolean).join(' ').trim();
+  const emailSent = await sendPasswordResetOtpEmail({
+    to: normalizedEmail,
+    otp,
+    name: name || user.name || '',
+  });
+
+  if (!emailSent) {
+    await PasswordResetOtp.deleteOne({ email: normalizedEmail });
+  }
+
+  return { emailSent, userFound: true };
+}
+
+/**
+ * Verify OTP and set new password.
+ */
+export async function resetPasswordWithOtp({ email, otp, password }) {
+  const normalizedEmail = email.toLowerCase().trim();
+  const otpStr = String(otp).trim();
+
+  const record = await PasswordResetOtp.findOne({ email: normalizedEmail });
+  if (!record) {
+    throw new Error('Invalid or expired verification code');
+  }
+  if (record.expiresAt.getTime() < Date.now()) {
+    await PasswordResetOtp.deleteOne({ _id: record._id });
+    throw new Error('Invalid or expired verification code');
+  }
+  if (record.attempts >= MAX_OTP_ATTEMPTS) {
+    await PasswordResetOtp.deleteOne({ _id: record._id });
+    throw new Error('Too many incorrect attempts. Please request a new code');
+  }
+
+  const match = await bcrypt.compare(otpStr, record.otpHash);
+  if (!match) {
+    record.attempts += 1;
+    await record.save();
+    throw new Error('Invalid or expired verification code');
+  }
+
+  const user = await User.findOne({ email: normalizedEmail });
+  if (!user) {
+    await PasswordResetOtp.deleteOne({ _id: record._id });
+    throw new Error('Invalid or expired verification code');
+  }
+
+  user.passwordHash = await bcrypt.hash(password, 10);
+  await user.save();
+  await PasswordResetOtp.deleteOne({ _id: record._id });
+
+  return { message: 'Password updated successfully' };
 }

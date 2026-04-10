@@ -47,10 +47,26 @@ app.use(express.urlencoded({ extended: true }));
  */
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
   "http://localhost:3000",
   "https://sctsinstitute.com",
   "https://www.sctsinstitute.com",
 ];
+
+function isDevLocalhostOrigin(origin) {
+  if (config.nodeEnv !== "development") return false;
+  try {
+    const u = new URL(origin);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+    if (u.hostname !== "localhost" && u.hostname !== "127.0.0.1") return false;
+    // Vite / other dev servers use arbitrary ports when defaults are taken
+    return u.port.length > 0;
+  } catch {
+    return false;
+  }
+}
 
 // Add CORS_ORIGIN from env if present (handles comma-separated lists)
 if (process.env.CORS_ORIGIN) {
@@ -67,6 +83,8 @@ const corsOptions = {
     // allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes("*")) {
+      callback(null, true);
+    } else if (isDevLocalhostOrigin(origin)) {
       callback(null, true);
     } else {
       console.warn(`CORS blocked for origin: ${origin}`);

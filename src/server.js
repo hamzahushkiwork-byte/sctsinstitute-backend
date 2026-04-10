@@ -1,5 +1,5 @@
 // backend/src/server.js
-import dotenv from "dotenv";
+import "./loadEnv.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -15,19 +15,16 @@ if (!fs.existsSync(uploadRoot)) {
   fs.mkdirSync(uploadRoot, { recursive: true });
 }
 
-// Load .env only in development/local environments
-let envPath = "";
-if (process.env.NODE_ENV !== "production") {
-  envPath = join(__dirname, "..", ".env");
-  if (fs.existsSync(envPath)) {
-    dotenv.config({ path: envPath });
-  }
-}
-
+const envPath = join(__dirname, "..", ".env");
 
 if (process.env.NODE_ENV === "development") {
   console.log("ENV CHECK:", {
     hasMongo: !!process.env.MONGODB_URI,
+    hasEmail: !!(
+      process.env.EMAIL_HOST &&
+      process.env.EMAIL_USER &&
+      process.env.EMAIL_PASS
+    ),
     nodeEnv: process.env.NODE_ENV,
     corsOrigin: process.env.CORS_ORIGIN,
     envPath,

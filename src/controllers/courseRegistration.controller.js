@@ -119,12 +119,19 @@ export async function updateRegistrationStatus(req, res) {
       return fail(res, 400, 'Valid status is required (pending, paid, or rejected)');
     }
 
-    const registration = await courseRegistrationService.updateRegistrationStatus(
+    const { registration, emailSent } = await courseRegistrationService.updateRegistrationStatus(
       id,
       status,
       notes || ''
     );
-    return ok(res, registration, 'Registration status updated successfully');
+    let message = 'Registration status updated successfully';
+    if (emailSent === true) {
+      message += ' A notification email was sent to the user.';
+    } else if (emailSent === false) {
+      message +=
+        ' The user could not be notified by email—check EMAIL_* / SMTP configuration on the server.';
+    }
+    return ok(res, { ...registration, emailSent }, message);
   } catch (error) {
     if (error.message === 'Registration not found') {
       return fail(res, 404, error.message);

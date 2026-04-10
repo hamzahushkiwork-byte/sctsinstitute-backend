@@ -71,3 +71,45 @@ export async function logout(req, res) {
     return fail(res, 500, error.message || 'Logout failed');
   }
 }
+
+/**
+ * Request OTP by email (same response whether or not the email exists).
+ */
+export async function forgotPassword(req, res) {
+  try {
+    const { emailSent, userFound } = await authService.requestPasswordReset(req.body.email);
+
+    if (userFound && !emailSent) {
+      console.error('Password reset: user found but email failed to send for', req.body.email);
+    }
+
+    return ok(
+      res,
+      null,
+      'If an account exists for this email, you will receive a password reset code shortly.'
+    );
+  } catch (error) {
+    console.error('forgotPassword error:', error);
+    return fail(res, 500, error.message || 'Request failed');
+  }
+}
+
+/**
+ * Submit OTP + new password.
+ */
+export async function resetPassword(req, res) {
+  try {
+    await authService.resetPasswordWithOtp(req.body);
+    return ok(res, null, 'Your password has been reset. You can sign in with your new password.');
+  } catch (error) {
+    const msg = error.message || 'Reset failed';
+    if (
+      msg.includes('Invalid or expired') ||
+      msg.includes('Too many incorrect')
+    ) {
+      return fail(res, 400, msg);
+    }
+    console.error('resetPassword error:', error);
+    return fail(res, 500, msg);
+  }
+}

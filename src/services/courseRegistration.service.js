@@ -1,6 +1,7 @@
 import CourseRegistration from '../models/CourseRegistration.model.js';
 import Course from '../models/Course.model.js';
 import User from '../models/User.model.js';
+import { sendCourseRegistrationStatusEmail } from './emailService.js';
 
 const SESSION_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -66,19 +67,32 @@ export async function registerForCourse(courseId, userId, sessionDateKey = '') {
     throw new Error('User not found');
   }
 
-  // Check if already registered
+  const key = normalizeSessionDateKey(sessionDateKey, course);
+
   const existingRegistration = await CourseRegistration.findOne({
     courseId,
     userId,
   });
 
   if (existingRegistration) {
-    throw new Error('User is already registered for this course');
+    const currentStatus = String(existingRegistration.status || '')
+      .toLowerCase()
+      .trim();
+    if (currentStatus !== 'rejected') {
+      throw new Error('User is already registered for this course');
+    }
+    // Re-submit after rejection: new session date (or empty) and back to pending
+    existingRegistration.sessionDateKey = key;
+    existingRegistration.status = 'pending';
+    existingRegistration.notes = '';
+    await existingRegistration.save();
+    await existingRegistration.populate('courseId', 'title slug');
+    await existingRegistration.populate('userId', 'firstName lastName email phoneNumber');
+    return existingRegistration.toObject
+      ? existingRegistration.toObject({ versionKey: false })
+      : existingRegistration;
   }
 
-  const key = normalizeSessionDateKey(sessionDateKey, course);
-
-  // Create registration
   const registration = await CourseRegistration.create({
     courseId,
     userId,
@@ -86,12 +100,10 @@ export async function registerForCourse(courseId, userId, sessionDateKey = '') {
     sessionDateKey: key,
   });
 
-  // Populate course and user details
   await registration.populate('courseId', 'title slug');
   await registration.populate('userId', 'firstName lastName email phoneNumber');
 
-  // Convert to plain object for consistent response
-  return registration.toObject ? registration.toObject() : registration;
+  return registration.toObject ? registration.toObject({ versionKey: false }) : registration;
 }
 
 /**
@@ -179,22 +191,64 @@ export async function getRegistrationsByUser(userId) {
 }
 
 /**
- * Update registration status
+ * Update registration status.
+ * When `status` changes, sends a notification email to the user (returns emailSent).
+ * @returns {Promise<{ registration: object, emailSent: boolean | null }>}
  */
 export async function updateRegistrationStatus(registrationId, status, notes = '') {
-  const registration = await CourseRegistration.findByIdAndUpdate(
-    registrationId,
-    { status, notes },
-    { new: true, runValidators: true }
-  )
-    .populate('courseId', 'title slug')
-    .populate('userId', 'firstName lastName email phoneNumber');
+  const reg = await CourseRegistration.findById(registrationId);
 
-  if (!registration) {
+  if (!reg) {
     throw new Error('Registration not found');
   }
 
-  return registration;
+  const previousStatus = reg.status;
+  const statusChanged = previousStatus !== status;
+
+  reg.status = status;
+  reg.notes = notes != null ? String(notes) : '';
+
+  await reg.save();
+
+  await reg.populate([
+    { path: 'courseId', select: 'title slug' },
+    { path: 'userId', select: 'firstName lastName email phoneNumber name' },
+  ]);
+
+  let emailSent = null;
+  if (statusChanged) {
+    const user = reg.userId;
+    const course = reg.courseId;
+    const userEmail = user && typeof user === 'object' ? user.email : null;
+    const userName =
+      user && typeof user === 'object'
+        ? [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.name || ''
+        : '';
+    const courseTitle =
+      course && typeof course === 'object' && course.title ? course.title : 'Course';
+    const courseSlug =
+      course && typeof course === 'object' && course.slug ? String(course.slug) : '';
+
+    if (userEmail) {
+      emailSent = await sendCourseRegistrationStatusEmail({
+        to: userEmail,
+        name: userName,
+        courseTitle,
+        courseSlug,
+        status,
+        notes: reg.notes || '',
+        sessionDateKey: reg.sessionDateKey || '',
+      });
+      if (!emailSent) {
+        console.error('Course registration status email failed for', userEmail);
+      }
+    } else {
+      emailSent = false;
+    }
+  }
+
+  const registration = reg.toObject ? reg.toObject({ versionKey: false }) : reg;
+  return { registration, emailSent };
 }
 
 /**

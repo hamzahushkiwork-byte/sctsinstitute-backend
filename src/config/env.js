@@ -38,6 +38,7 @@ export default {
   emailPass: process.env.EMAIL_PASS,
   emailFrom: process.env.EMAIL_FROM,
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+  testEmailSecret: process.env.TEST_EMAIL_SECRET,
 };
 
 export const MONGODB_URI = process.env.MONGODB_URI;

@@ -4,6 +4,10 @@ import multer from 'multer';
 import { existsSync, mkdirSync } from 'fs';
 import * as adminController from '../../controllers/admin.controller.js';
 import authMiddleware from '../../middlewares/auth.middleware.js';
+import { requireAdminRole } from '../../middlewares/adminRole.middleware.js';
+import { validate } from '../../middlewares/validate.middleware.js';
+import { broadcastEmailSchema } from '../../validators/broadcast.validator.js';
+import { broadcastEmailRateLimiter } from '../../middlewares/rateLimit.middleware.js';
 import partnersAdminRoutes from '../admin/partners.routes.js';
 import servicesAdminRoutes from '../admin/services.routes.js';
 import certificationAdminRoutes from '../admin/certification.admin.routes.js';
@@ -129,6 +133,16 @@ router.put('/contact-messages/:id', adminController.updateContactMessage);
 
 // Users
 router.get('/users', adminController.getAllUsers);
+
+// Broadcast email to all users (admin only; history stored in DB)
+router.post(
+  '/broadcast-emails',
+  requireAdminRole,
+  broadcastEmailRateLimiter,
+  validate(broadcastEmailSchema),
+  adminController.sendBroadcastEmail
+);
+router.get('/broadcast-emails', requireAdminRole, adminController.getBroadcastEmailLogs);
 
 // Course Registrations
 router.get('/course-registrations', adminController.getAllCourseRegistrations);

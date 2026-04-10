@@ -24,3 +24,50 @@ export const registerRateLimiter = rateLimit({
     });
   },
 });
+
+/** Limit password-reset code requests */
+export const forgotPasswordRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req, res) => ipKeyGenerator(req, res),
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: 'Too many password reset requests. Please try again in an hour.',
+      errors: null,
+    });
+  },
+});
+
+/** Limit OTP verification attempts */
+export const broadcastEmailRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req, res) => ipKeyGenerator(req, res),
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: 'Too many broadcast email attempts. Please try again later.',
+      errors: null,
+    });
+  },
+});
+
+export const resetPasswordRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req, res) => ipKeyGenerator(req, res),
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: 'Too many attempts. Please wait and try again.',
+      errors: null,
+    });
+  },
+});

@@ -2,6 +2,7 @@ import { ok, fail } from '../utils/response.js';
 import * as adminService from '../services/admin.service.js';
 import * as contactService from '../services/contact.service.js';
 import * as courseRegistrationService from '../services/courseRegistration.service.js';
+import * as broadcastEmailService from '../services/broadcastEmail.service.js';
 import Partner from '../models/Partner.model.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -289,6 +290,26 @@ export async function getAllCourseRegistrations(req, res) {
   }
 }
 
+// Broadcast emails (admin only — requireAdminRole on route)
+export async function sendBroadcastEmail(req, res) {
+  try {
+    const result = await broadcastEmailService.runBroadcastEmail(req.body, req.user);
+    const message = `Broadcast completed: ${result.successCount} sent, ${result.failCount} failed, ${result.recipientCount} recipients.`;
+    return ok(res, result, message);
+  } catch (error) {
+    return fail(res, 400, error.message || 'Broadcast failed');
+  }
+}
+
+export async function getBroadcastEmailLogs(req, res) {
+  try {
+    const logs = await broadcastEmailService.getBroadcastEmailLogs(200);
+    return ok(res, logs);
+  } catch (error) {
+    return fail(res, 500, error.message || 'Failed to load email history');
+  }
+}
+
 export async function updateCourseRegistrationStatus(req, res) {
   try {
     const { id } = req.params;
@@ -298,12 +319,19 @@ export async function updateCourseRegistrationStatus(req, res) {
       return fail(res, 400, 'Valid status is required (pending, paid, or rejected)');
     }
 
-    const registration = await courseRegistrationService.updateRegistrationStatus(
+    const { registration, emailSent } = await courseRegistrationService.updateRegistrationStatus(
       id,
       status,
       notes || ''
     );
-    return ok(res, registration, 'Registration status updated successfully');
+    let message = 'Registration status updated successfully';
+    if (emailSent === true) {
+      message += ' A notification email was sent to the user.';
+    } else if (emailSent === false) {
+      message +=
+        ' The user could not be notified by email—check EMAIL_* / SMTP configuration on the server.';
+    }
+    return ok(res, { ...registration, emailSent }, message);
   } catch (error) {
     if (error.message === 'Registration not found') {
       return fail(res, 404, error.message);
