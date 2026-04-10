@@ -34,13 +34,21 @@ export async function sendWelcomeEmail({ to, name }) {
 
     const transporter = createTransporter();
 
-    // Verify transporter configuration
-    await transporter.verify();
+    const siteName = 'SCTS Institute';
+    const loginUrl = `${(config.frontendUrl || 'http://localhost:5173').replace(/\/$/, '')}/login`;
 
     const mailOptions = {
       from: config.emailFrom || config.emailUser,
       to,
-      subject: 'Welcome to Our Platform 🎉',
+      subject: `Welcome to ${siteName} — your account is ready`,
+      text: [
+        `Hello ${name},`,
+        '',
+        `Thank you for registering at ${siteName}. Your account has been created successfully.`,
+        `You can sign in here: ${loginUrl}`,
+        '',
+        'This is an automated message. Please do not reply directly to this email.',
+      ].join('\n'),
       html: `
         <!DOCTYPE html>
         <html>
@@ -56,7 +64,7 @@ export async function sendWelcomeEmail({ to, name }) {
                   <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                     <tr>
                       <td style="padding: 40px 30px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px 12px 0 0;">
-                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">Welcome to Our Platform! 🎉</h1>
+                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">Welcome to SCTS Institute</h1>
                       </td>
                     </tr>
                     <tr>
@@ -65,14 +73,14 @@ export async function sendWelcomeEmail({ to, name }) {
                           Hello <strong>${name}</strong>,
                         </p>
                         <p style="margin: 0 0 20px 0; color: #4a5568; font-size: 16px; line-height: 1.6;">
-                          Thank you for joining us! We're excited to have you on board.
+                          Thank you for registering with SCTS Institute.
                         </p>
                         <p style="margin: 0 0 20px 0; color: #4a5568; font-size: 16px; line-height: 1.6;">
-                          Your account has been successfully created. You can now start exploring all the features we have to offer.
+                          Your account is active. You can sign in with the email and password you used to register.
                         </p>
                         <div style="margin: 30px 0; text-align: center;">
-                          <a href="${config.frontendUrl || 'http://localhost:5173'}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                            Get Started
+                          <a href="${loginUrl}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                            Sign in
                           </a>
                         </div>
                         <p style="margin: 30px 0 0 0; color: #718096; font-size: 14px; line-height: 1.6;">
@@ -80,7 +88,7 @@ export async function sendWelcomeEmail({ to, name }) {
                         </p>
                         <p style="margin: 20px 0 0 0; color: #718096; font-size: 14px; line-height: 1.6;">
                           Best regards,<br>
-                          <strong>The Team</strong>
+                          <strong>SCTS Institute</strong>
                         </p>
                       </td>
                     </tr>

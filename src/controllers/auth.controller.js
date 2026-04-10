@@ -14,48 +14,21 @@ export async function login(req, res) {
 export async function signup(req, res) {
   try {
     const result = await authService.signup(req.body);
-    
-    // Attempt to send welcome email asynchronously (don't block response)
-    // Use setImmediate to ensure registration response is sent first
-    let emailSent = false;
-    const userFullName = `${result.user.firstName} ${result.user.lastName}`;
-    
-    // Try to send email, but don't wait for it
-    setImmediate(async () => {
-      try {
-        emailSent = await sendWelcomeEmail({
-          to: result.user.email,
-          name: userFullName,
-        });
-      } catch (error) {
-        // Email sending errors are already logged in emailService
-        emailSent = false;
-      }
-    });
 
-    // For now, attempt synchronous send with timeout to get emailSent status
-    // If it takes too long, we'll return emailSent: false
+    const userFullName = `${result.user.firstName} ${result.user.lastName}`;
+    let emailSent = false;
     try {
-      const emailPromise = sendWelcomeEmail({
+      emailSent = await sendWelcomeEmail({
         to: result.user.email,
         name: userFullName,
       });
-      
-      // Wait max 2 seconds for email to send
-      const timeoutPromise = new Promise((resolve) => {
-        setTimeout(() => resolve(false), 2000);
-      });
-      
-      emailSent = await Promise.race([emailPromise, timeoutPromise]);
-    } catch (error) {
-      // Email failed, but registration succeeded
+    } catch {
       emailSent = false;
     }
 
-    // Return response with emailSent flag
-    const message = emailSent 
-      ? 'User registered successfully' 
-      : 'Registered, but email failed to send';
+    const message = emailSent
+      ? 'User registered successfully. A confirmation email has been sent.'
+      : 'User registered successfully. We could not send a confirmation email—please check that email (SMTP) is configured.';
     
     return res.status(201).json({
       success: true,

@@ -1,7 +1,6 @@
 import User from '../models/User.model.js';
 import bcrypt from 'bcrypt';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
-import { sendWelcomeEmail } from './emailService.js';
 
 export async function login(data) {
   const { email, password } = data;
