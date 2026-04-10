@@ -29,7 +29,7 @@ Railway uses dynamic IPs, so you must allow all IPs (`0.0.0.0/0`) for Atlas to a
    - `CORS_ORIGIN`: Your frontend URL (e.g., `https://your-frontend-domain.up.railway.app`).
    - `JWT_ACCESS_SECRET`: A secure random string.
    - `JWT_REFRESH_SECRET`: A secure random string.
-   - `EMAIL_HOST`, `EMAIL_USER`, `EMAIL_PASS`, etc. (if using email features).
+   - `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM`, `FRONTEND_URL` — **required for signup welcome emails** (Hostinger: port `465` + `EMAIL_SECURE=true`, or port `587` + `EMAIL_SECURE=false`).
 4. **Networking**:
    - Go to **Service > Settings > Domains**.
    - Click **Generate Domain**.
