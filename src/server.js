@@ -57,6 +57,15 @@ async function startServer() {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📡 Environment: ${config.nodeEnv}`);
     console.log(`🔗 Health check available at /`);
+    const emailOk =
+      process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS;
+    if (!emailOk) {
+      console.warn(
+        "⚠️  SMTP not configured (set EMAIL_HOST, EMAIL_USER, EMAIL_PASS on the host or in backend/.env). Welcome / reset / course emails will be skipped."
+      );
+    } else {
+      console.log("✉️  SMTP configured (welcome and transactional emails enabled).");
+    }
   });
 }
 
