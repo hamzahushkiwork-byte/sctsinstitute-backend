@@ -41,6 +41,12 @@ export default {
   emailFrom: process.env.EMAIL_FROM,
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   testEmailSecret: process.env.TEST_EMAIL_SECRET,
+  /** Milliseconds for TCP + socket (default 60000). Raise only if the server is very slow. */
+  emailSmtpTimeoutMs: process.env.EMAIL_SMTP_TIMEOUT_MS || '60000',
+  /** Force IPv4 (`4`) or IPv6 (`6`) if connections hang (try `4` when you see ETIMEDOUT). */
+  emailSmtpFamily:
+    process.env.EMAIL_SMTP_FAMILY ||
+    (process.env.EMAIL_SMTP_IPV4 === '1' || process.env.EMAIL_SMTP_IPV4 === 'true' ? '4' : ''),
 };
 
 export const MONGODB_URI = process.env.MONGODB_URI;

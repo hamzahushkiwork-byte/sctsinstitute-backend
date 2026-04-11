@@ -14,7 +14,11 @@ function isTruthyEnv(val) {
 function createTransporter() {
   const port = parseInt(config.emailPort, 10) || 587;
   const secure = isTruthyEnv(config.emailSecure) || port === 465;
-  return nodemailer.createTransport({
+  const timeoutMs = Math.max(5000, parseInt(config.emailSmtpTimeoutMs, 10) || 60000);
+  const familyStr = String(config.emailSmtpFamily || '').trim();
+  const family = familyStr === '4' || familyStr === '6' ? parseInt(familyStr, 10) : undefined;
+
+  const transport = {
     host: config.emailHost,
     port,
     secure,
@@ -22,7 +26,35 @@ function createTransporter() {
       user: config.emailUser,
       pass: config.emailPass,
     },
-  });
+    connectionTimeout: timeoutMs,
+    greetingTimeout: Math.min(30000, timeoutMs),
+    socketTimeout: timeoutMs,
+  };
+  if (family === 4 || family === 6) {
+    transport.family = family;
+  }
+  return nodemailer.createTransport(transport);
+}
+
+/** Richer logs for SMTP failures (timeouts, auth, blocked ports). */
+function logSmtpFailure(context, err) {
+  const e = err && typeof err === 'object' ? err : {};
+  const bits = [e.message || String(err)];
+  if (e.code) bits.push(`code=${e.code}`);
+  if (e.command) bits.push(`command=${e.command}`);
+  if (e.responseCode) bits.push(`smtpCode=${e.responseCode}`);
+  if (e.response) bits.push(`response=${String(e.response).slice(0, 300)}`);
+  console.error(`[SMTP] ${context}:`, bits.join(' | '));
+  const msg = String(e.message || '');
+  const timedOut =
+    e.code === 'ETIMEDOUT' ||
+    e.code === 'ESOCKET' ||
+    /timeout/i.test(msg);
+  if (timedOut) {
+    console.error(
+      '[SMTP] Connection timed out — usual causes: (1) host blocks outbound SMTP (465/587/25); (2) wrong EMAIL_HOST/PORT; (3) use port 465 + EMAIL_SECURE=true OR port 587 + EMAIL_SECURE=false; (4) try EMAIL_SMTP_IPV4=1; (5) use a relay (SendGrid/SES) if your provider blocks SMTP.'
+    );
+  }
 }
 
 const ORG_NAME_EN = 'Saudi Canadian Training & Simulation Center';
@@ -211,7 +243,7 @@ export async function sendWelcomeEmail({ to, name }) {
     console.log('Welcome email sent successfully:', info.messageId);
     return true;
   } catch (error) {
-    console.error('Failed to send welcome email:', error.message);
+    logSmtpFailure('welcome email', error);
     // Don't throw error - return false so registration can still succeed
     return false;
   }
@@ -316,7 +348,7 @@ export async function sendPasswordResetOtpEmail({ to, otp, name = '' }) {
     });
     return true;
   } catch (err) {
-    console.error('Failed to send password reset email:', err.message);
+    logSmtpFailure('password reset email', err);
     return false;
   }
 }
@@ -463,7 +495,7 @@ export async function sendCourseRegistrationStatusEmail({
     });
     return true;
   } catch (err) {
-    console.error('Failed to send course registration status email:', err.message);
+    logSmtpFailure('course registration email', err);
     return false;
   }
 }
@@ -490,7 +522,7 @@ export async function sendSimpleEmail({ to, subject, text = '', html = '' }) {
     });
     return true;
   } catch (err) {
-    console.error('sendSimpleEmail failed:', to, err.message);
+    logSmtpFailure(`sendSimpleEmail (${to})`, err);
     return false;
   }
 }
@@ -515,7 +547,7 @@ export async function sendTestEmail({ to }) {
     });
     return { ok: true, messageId: info.messageId };
   } catch (err) {
-    console.error('sendTestEmail failed:', err.message);
+    logSmtpFailure('sendTestEmail', err);
     return { ok: false, error: err.message || 'sendMail failed' };
   }
 }
