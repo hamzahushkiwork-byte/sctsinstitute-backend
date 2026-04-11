@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import config from '../config/env.js';
 
 function isTruthyEnv(val) {
@@ -7,10 +8,17 @@ function isTruthyEnv(val) {
   return false;
 }
 
-/**
- * Create and return a nodemailer transporter
- * Uses SMTP credentials from environment variables
- */
+// ---------------------------------------------------------------------------
+// Transport layer — Resend HTTP API (preferred) or SMTP fallback
+// ---------------------------------------------------------------------------
+
+const useResend = !!config.resendApiKey;
+let resendClient;
+if (useResend) {
+  resendClient = new Resend(config.resendApiKey);
+  console.log('[Email] Using Resend HTTP API (port 443 — no SMTP needed).');
+}
+
 function createTransporter() {
   const port = parseInt(config.emailPort, 10) || 587;
   const secure = isTruthyEnv(config.emailSecure) || port === 465;
@@ -22,40 +30,72 @@ function createTransporter() {
     host: config.emailHost,
     port,
     secure,
-    auth: {
-      user: config.emailUser,
-      pass: config.emailPass,
-    },
+    auth: { user: config.emailUser, pass: config.emailPass },
     connectionTimeout: timeoutMs,
     greetingTimeout: Math.min(30000, timeoutMs),
     socketTimeout: timeoutMs,
   };
-  if (family === 4 || family === 6) {
-    transport.family = family;
-  }
+  if (family === 4 || family === 6) transport.family = family;
   return nodemailer.createTransport(transport);
 }
 
-/** Richer logs for SMTP failures (timeouts, auth, blocked ports). */
-function logSmtpFailure(context, err) {
+function logEmailFailure(context, err) {
   const e = err && typeof err === 'object' ? err : {};
   const bits = [e.message || String(err)];
   if (e.code) bits.push(`code=${e.code}`);
   if (e.command) bits.push(`command=${e.command}`);
   if (e.responseCode) bits.push(`smtpCode=${e.responseCode}`);
   if (e.response) bits.push(`response=${String(e.response).slice(0, 300)}`);
-  console.error(`[SMTP] ${context}:`, bits.join(' | '));
+  if (e.statusCode) bits.push(`httpStatus=${e.statusCode}`);
+  console.error(`[Email] ${context}:`, bits.join(' | '));
   const msg = String(e.message || '');
-  const timedOut =
-    e.code === 'ETIMEDOUT' ||
-    e.code === 'ESOCKET' ||
-    /timeout/i.test(msg);
-  if (timedOut) {
+  if (e.code === 'ETIMEDOUT' || e.code === 'ESOCKET' || /timeout/i.test(msg)) {
     console.error(
-      '[SMTP] Connection timed out — usual causes: (1) host blocks outbound SMTP (465/587/25); (2) wrong EMAIL_HOST/PORT; (3) use port 465 + EMAIL_SECURE=true OR port 587 + EMAIL_SECURE=false; (4) try EMAIL_SMTP_IPV4=1; (5) use a relay (SendGrid/SES) if your provider blocks SMTP.'
+      '[Email] SMTP timed out. Set RESEND_API_KEY to bypass SMTP and send via HTTPS instead.'
     );
   }
 }
+
+/**
+ * Unified mail delivery — uses Resend HTTP when available, SMTP otherwise.
+ * @param {{ from?: string, to: string, subject: string, text?: string, html?: string }} opts
+ * @returns {Promise<{ messageId?: string }>}
+ */
+async function deliverMail({ from, to, subject, text, html }) {
+  const sender = from || config.emailFrom || config.emailUser;
+
+  if (useResend) {
+    const payload = { from: sender, to: [to], subject };
+    if (html && html.trim()) payload.html = html;
+    if (text && text.trim()) payload.text = text;
+    const { data, error } = await resendClient.emails.send(payload);
+    if (error) throw new Error(error.message || JSON.stringify(error));
+    return { messageId: data?.id };
+  }
+
+  if (!config.emailHost || !config.emailUser || !config.emailPass) {
+    throw new Error('Email not configured (set RESEND_API_KEY or EMAIL_HOST+USER+PASS)');
+  }
+  const transporter = createTransporter();
+  const info = await transporter.sendMail({
+    from: sender,
+    to,
+    subject,
+    text: text?.trim() ? text : undefined,
+    html: html?.trim() ? html : undefined,
+  });
+  return { messageId: info.messageId };
+}
+
+/** Quick check whether any email provider is configured. */
+function isEmailConfigured() {
+  if (useResend) return true;
+  return !!(config.emailHost && config.emailUser && config.emailPass);
+}
+
+// ---------------------------------------------------------------------------
+// Constants & helpers
+// ---------------------------------------------------------------------------
 
 const ORG_NAME_EN = 'Saudi Canadian Training & Simulation Center';
 const ORG_NAME_AR = 'المركز السعودي الكندي للتدريب والمحاكاة';
@@ -125,27 +165,21 @@ function courseRegistrationStatusCopy(status) {
   return map[status] || map.pending;
 }
 
-/**
- * Send welcome email to newly registered user
- * @param {Object} params
- * @param {string} params.to - Recipient email address
- * @param {string} params.name - User's full name (firstName + lastName)
- * @returns {Promise<boolean>} Returns true if email sent successfully, false otherwise
- */
+// ---------------------------------------------------------------------------
+// Public email functions
+// ---------------------------------------------------------------------------
+
 export async function sendWelcomeEmail({ to, name }) {
   try {
-    // Validate required environment variables
-    if (!config.emailHost || !config.emailUser || !config.emailPass) {
+    if (!isEmailConfigured()) {
       console.error('Email configuration missing. Cannot send welcome email.');
       return false;
     }
 
-    const transporter = createTransporter();
-
     const loginUrl = `${(config.frontendUrl || 'http://localhost:5173').replace(/\/$/, '')}/login`;
     const safeName = escapeHtml(name);
 
-    const textEn = [
+    const text = [
       `Dear ${name},`,
       '',
       `Thank you for registering with the ${ORG_NAME_EN}. We're happy to have you as part of our community.`,
@@ -169,98 +203,90 @@ export async function sendWelcomeEmail({ to, name }) {
       `Sign in: ${loginUrl}`,
     ].join('\n');
 
-    const mailOptions = {
-      from: config.emailFrom || config.emailUser,
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Thank you for registering</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa;">
+          <table role="presentation" style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);">
+                  <tr>
+                    <td style="padding: 36px 32px 24px 32px;">
+                      <p style="margin: 0 0 16px 0; color: #1a202c; font-size: 16px; line-height: 1.65;">
+                        Dear <strong>${safeName}</strong>,
+                      </p>
+                      <p style="margin: 0 0 16px 0; color: #2d3748; font-size: 16px; line-height: 1.65;">
+                        Thank you for registering with the ${ORG_NAME_EN}. We're happy to have you as part of our community.
+                      </p>
+                      <p style="margin: 0 0 16px 0; color: #2d3748; font-size: 16px; line-height: 1.65;">
+                        If you need any assistance, feel free to reach out to us anytime.
+                      </p>
+                      <p style="margin: 0 0 28px 0; color: #2d3748; font-size: 16px; line-height: 1.65;">
+                        Best regards,<br>
+                        <strong>${ORG_NAME_EN}</strong>
+                      </p>
+                      <p style="margin: 0 0 8px 0; color: #718096; font-size: 13px; line-height: 1.5;">
+                        <a href="${loginUrl}" style="color: #2b6cb0;">Sign in to your account</a>
+                      </p>
+                      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0;" />
+                      <div dir="rtl" style="text-align: right;">
+                        <p style="margin: 0 0 16px 0; color: #1a202c; font-size: 16px; line-height: 1.75; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Arabic UI Text', 'Tahoma', sans-serif;">
+                          عزيزي/عزيزتي،
+                        </p>
+                        <p style="margin: 0 0 16px 0; color: #2d3748; font-size: 16px; line-height: 1.75; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Arabic UI Text', 'Tahoma', sans-serif;">
+                          شكرًا لتسجيلك في ${ORG_NAME_AR}. يسعدنا انضمامك إلى عائلتنا.
+                        </p>
+                        <p style="margin: 0 0 16px 0; color: #2d3748; font-size: 16px; line-height: 1.75; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Arabic UI Text', 'Tahoma', sans-serif;">
+                          في حال احتجت أي مساعدة، لا تتردد في التواصل معنا في أي وقت.
+                        </p>
+                        <p style="margin: 0; color: #2d3748; font-size: 16px; line-height: 1.75; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Arabic UI Text', 'Tahoma', sans-serif;">
+                          تحياتنا،<br>
+                          <strong>${ORG_NAME_AR}</strong>
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 20px 32px; background-color: #f7fafc; border-radius: 0 0 12px 12px; text-align: center;">
+                      <p style="margin: 0; color: #a0aec0; font-size: 12px; line-height: 1.5;">
+                        This is an automated message. Please use the contact options on our website if you need help.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const info = await deliverMail({
       to,
       subject: `Thank you for registering — ${ORG_NAME_EN}`,
-      text: textEn,
-      html: `
-        <!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Thank you for registering</title>
-          </head>
-          <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fa;">
-            <table role="presentation" style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td align="center" style="padding: 40px 20px;">
-                  <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);">
-                    <tr>
-                      <td style="padding: 36px 32px 24px 32px;">
-                        <p style="margin: 0 0 16px 0; color: #1a202c; font-size: 16px; line-height: 1.65;">
-                          Dear <strong>${safeName}</strong>,
-                        </p>
-                        <p style="margin: 0 0 16px 0; color: #2d3748; font-size: 16px; line-height: 1.65;">
-                          Thank you for registering with the ${ORG_NAME_EN}. We're happy to have you as part of our community.
-                        </p>
-                        <p style="margin: 0 0 16px 0; color: #2d3748; font-size: 16px; line-height: 1.65;">
-                          If you need any assistance, feel free to reach out to us anytime.
-                        </p>
-                        <p style="margin: 0 0 28px 0; color: #2d3748; font-size: 16px; line-height: 1.65;">
-                          Best regards,<br>
-                          <strong>${ORG_NAME_EN}</strong>
-                        </p>
-                        <p style="margin: 0 0 8px 0; color: #718096; font-size: 13px; line-height: 1.5;">
-                          <a href="${loginUrl}" style="color: #2b6cb0;">Sign in to your account</a>
-                        </p>
-                        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0;" />
-                        <div dir="rtl" style="text-align: right;">
-                          <p style="margin: 0 0 16px 0; color: #1a202c; font-size: 16px; line-height: 1.75; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Arabic UI Text', 'Tahoma', sans-serif;">
-                            عزيزي/عزيزتي،
-                          </p>
-                          <p style="margin: 0 0 16px 0; color: #2d3748; font-size: 16px; line-height: 1.75; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Arabic UI Text', 'Tahoma', sans-serif;">
-                            شكرًا لتسجيلك في ${ORG_NAME_AR}. يسعدنا انضمامك إلى عائلتنا.
-                          </p>
-                          <p style="margin: 0 0 16px 0; color: #2d3748; font-size: 16px; line-height: 1.75; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Arabic UI Text', 'Tahoma', sans-serif;">
-                            في حال احتجت أي مساعدة، لا تتردد في التواصل معنا في أي وقت.
-                          </p>
-                          <p style="margin: 0; color: #2d3748; font-size: 16px; line-height: 1.75; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Arabic UI Text', 'Tahoma', sans-serif;">
-                            تحياتنا،<br>
-                            <strong>${ORG_NAME_AR}</strong>
-                          </p>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 20px 32px; background-color: #f7fafc; border-radius: 0 0 12px 12px; text-align: center;">
-                        <p style="margin: 0; color: #a0aec0; font-size: 12px; line-height: 1.5;">
-                          This is an automated message. Please use the contact options on our website if you need help.
-                        </p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </body>
-        </html>
-      `,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
+      text,
+      html,
+    });
     console.log('Welcome email sent successfully:', info.messageId);
     return true;
   } catch (error) {
-    logSmtpFailure('welcome email', error);
-    // Don't throw error - return false so registration can still succeed
+    logEmailFailure('welcome email', error);
     return false;
   }
 }
 
-/**
- * Send 6-digit OTP for password reset (plain + HTML).
- * @param {{ to: string, otp: string, name?: string }} params
- * @returns {Promise<boolean>}
- */
 export async function sendPasswordResetOtpEmail({ to, otp, name = '' }) {
   try {
-    if (!config.emailHost || !config.emailUser || !config.emailPass) {
+    if (!isEmailConfigured()) {
       console.error('Email configuration missing. Cannot send password reset email.');
       return false;
     }
-    const transporter = createTransporter();
     const safeName = escapeHtml(name || 'Participant');
     const safeOtp = escapeHtml(otp);
     const loginUrl = `${(config.frontendUrl || 'http://localhost:5173').replace(/\/$/, '')}/login`;
@@ -339,8 +365,7 @@ export async function sendPasswordResetOtpEmail({ to, otp, name = '' }) {
       </html>
     `;
 
-    await transporter.sendMail({
-      from: config.emailFrom || config.emailUser,
+    await deliverMail({
       to,
       subject: `Your password reset code — ${ORG_NAME_EN}`,
       text,
@@ -348,16 +373,11 @@ export async function sendPasswordResetOtpEmail({ to, otp, name = '' }) {
     });
     return true;
   } catch (err) {
-    logSmtpFailure('password reset email', err);
+    logEmailFailure('password reset email', err);
     return false;
   }
 }
 
-/**
- * Notify user when admin updates course registration status.
- * @param {{ to: string, name?: string, courseTitle: string, courseSlug?: string, status: string, notes?: string, sessionDateKey?: string }} params
- * @returns {Promise<boolean>}
- */
 export async function sendCourseRegistrationStatusEmail({
   to,
   name = '',
@@ -368,11 +388,10 @@ export async function sendCourseRegistrationStatusEmail({
   sessionDateKey = '',
 }) {
   try {
-    if (!config.emailHost || !config.emailUser || !config.emailPass) {
+    if (!isEmailConfigured()) {
       console.error('Email configuration missing. Cannot send course registration email.');
       return false;
     }
-    const transporter = createTransporter();
     const copy = courseRegistrationStatusCopy(status);
     const safeName = escapeHtml(name || 'Participant');
     const safeTitle = escapeHtml(courseTitle || 'Course');
@@ -428,7 +447,6 @@ export async function sendCourseRegistrationStatusEmail({
       notes && String(notes).trim()
         ? `<p style="margin:16px 0 0 0;padding:14px;background:#f7fafc;border-radius:8px;color:#2d3748;font-size:14px;line-height:1.6;"><strong>Message from our team:</strong><br>${safeNotes.replace(/\n/g, '<br>')}</p>`
         : '';
-
     const sessionHtmlEn =
       sessionEn
         ? `<p style="margin:12px 0 0 0;color:#4a5568;font-size:14px;"><strong>Preferred session date:</strong> ${escapeHtml(sessionEn)}</p>`
@@ -486,8 +504,7 @@ export async function sendCourseRegistrationStatusEmail({
       </html>
     `;
 
-    await transporter.sendMail({
-      from: config.emailFrom || config.emailUser,
+    await deliverMail({
       to,
       subject: `Course registration: ${copy.enLabel} — ${courseTitle}`,
       text,
@@ -495,59 +512,45 @@ export async function sendCourseRegistrationStatusEmail({
     });
     return true;
   } catch (err) {
-    logSmtpFailure('course registration email', err);
+    logEmailFailure('course registration email', err);
     return false;
   }
 }
 
-/**
- * Single-recipient email (admin broadcast sends one per user).
- * @param {{ to: string, subject: string, text?: string, html?: string }} params
- * @returns {Promise<boolean>}
- */
 export async function sendSimpleEmail({ to, subject, text = '', html = '' }) {
   try {
-    if (!config.emailHost || !config.emailUser || !config.emailPass) {
+    if (!isEmailConfigured()) {
       console.error('Email configuration missing. Cannot send email.');
       return false;
     }
     if (!to || !subject) return false;
-    const transporter = createTransporter();
-    await transporter.sendMail({
-      from: config.emailFrom || config.emailUser,
+    await deliverMail({
       to,
       subject: String(subject).slice(0, 998),
-      text: text?.trim() ? text : undefined,
-      html: html?.trim() ? html : undefined,
+      text,
+      html,
     });
     return true;
   } catch (err) {
-    logSmtpFailure(`sendSimpleEmail (${to})`, err);
+    logEmailFailure(`sendSimpleEmail (${to})`, err);
     return false;
   }
 }
 
-/**
- * Send a one-off test message (for GET /test-email).
- * @param {{ to: string }} params
- * @returns {Promise<{ ok: true, messageId?: string } | { ok: false, error: string }>}
- */
 export async function sendTestEmail({ to }) {
-  if (!config.emailHost || !config.emailUser || !config.emailPass) {
-    return { ok: false, error: 'Email configuration missing (EMAIL_HOST, EMAIL_USER, EMAIL_PASS)' };
+  if (!isEmailConfigured()) {
+    return { ok: false, error: 'Email not configured (set RESEND_API_KEY or EMAIL_HOST+USER+PASS)' };
   }
   try {
-    const transporter = createTransporter();
-    const info = await transporter.sendMail({
-      from: config.emailFrom || config.emailUser,
+    const info = await deliverMail({
       to,
       subject: `Test email — ${ORG_NAME_EN}`,
-      text: 'If you received this, SMTP is configured correctly.\n\nإذا وصلك هذا الإيميل فكل شي تمام 🎉',
-      html: '<p>If you received this, SMTP is configured correctly.</p><p>إذا وصلك هذا الإيميل فكل شي تمام 🎉</p>',
+      text: 'If you received this, email is configured correctly.\n\nإذا وصلك هذا الإيميل فكل شي تمام 🎉',
+      html: '<p>If you received this, email is configured correctly.</p><p>إذا وصلك هذا الإيميل فكل شي تمام 🎉</p>',
     });
     return { ok: true, messageId: info.messageId };
   } catch (err) {
-    logSmtpFailure('sendTestEmail', err);
-    return { ok: false, error: err.message || 'sendMail failed' };
+    logEmailFailure('sendTestEmail', err);
+    return { ok: false, error: err.message || 'Send failed' };
   }
 }

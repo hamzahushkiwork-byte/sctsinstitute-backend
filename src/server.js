@@ -57,14 +57,17 @@ async function startServer() {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📡 Environment: ${config.nodeEnv}`);
     console.log(`🔗 Health check available at /`);
-    const emailOk =
+    const hasResend = !!process.env.RESEND_API_KEY;
+    const hasSmtp =
       process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS;
-    if (!emailOk) {
-      console.warn(
-        "⚠️  SMTP not configured (set EMAIL_HOST, EMAIL_USER, EMAIL_PASS on the host or in backend/.env). Welcome / reset / course emails will be skipped."
-      );
-    } else {
+    if (hasResend) {
+      console.log("✉️  Resend API key detected — emails sent via HTTPS (no SMTP needed).");
+    } else if (hasSmtp) {
       console.log("✉️  SMTP configured (welcome and transactional emails enabled).");
+    } else {
+      console.warn(
+        "⚠️  No email provider configured. Set RESEND_API_KEY (recommended) or EMAIL_HOST+USER+PASS. Emails will be skipped."
+      );
     }
   });
 }
