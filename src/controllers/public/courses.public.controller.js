@@ -21,7 +21,7 @@ export async function getActiveCourses(req, res) {
 
     const courses = await Course.find(query)
       .sort({ sortOrder: 1, createdAt: -1 })
-      .select('title slug cardBody imageUrl isAvailable availableDates')
+      .select('title slug cardBody imageUrl isAvailable availableDates sessionTime location')
       .lean();
 
     return ok(res, courses);
@@ -47,7 +47,9 @@ export async function getCourseBySlug(req, res) {
       slug: slug.toLowerCase().trim(),
       isActive: true
     })
-      .select('title slug cardBody description imageUrl isAvailable availableDates')
+      .select(
+        'title slug cardBody description imageUrl isAvailable availableDates sessionTime location'
+      )
       .lean();
 
     if (!course) {

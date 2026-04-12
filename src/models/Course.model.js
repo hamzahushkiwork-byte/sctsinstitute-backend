@@ -46,6 +46,18 @@ const courseSchema = new mongoose.Schema(
       type: [Date],
       default: [],
     },
+    /** Shown on course page and in confirmation emails (e.g. "9:00 AM – 1:00 PM"). */
+    sessionTime: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    /** Venue / address text for the course and confirmation emails. */
+    location: {
+      type: String,
+      trim: true,
+      default: '',
+    },
   },
   {
     timestamps: true,

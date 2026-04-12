@@ -86,7 +86,7 @@ export async function registerForCourse(courseId, userId, sessionDateKey = '') {
     existingRegistration.status = 'pending';
     existingRegistration.notes = '';
     await existingRegistration.save();
-    await existingRegistration.populate('courseId', 'title slug');
+    await existingRegistration.populate('courseId', 'title slug sessionTime location');
     await existingRegistration.populate('userId', 'firstName lastName email phoneNumber');
     return existingRegistration.toObject
       ? existingRegistration.toObject({ versionKey: false })
@@ -100,7 +100,7 @@ export async function registerForCourse(courseId, userId, sessionDateKey = '') {
     sessionDateKey: key,
   });
 
-  await registration.populate('courseId', 'title slug');
+  await registration.populate('courseId', 'title slug sessionTime location');
   await registration.populate('userId', 'firstName lastName email phoneNumber');
 
   return registration.toObject ? registration.toObject({ versionKey: false }) : registration;
@@ -113,7 +113,7 @@ export async function getAllRegistrations() {
   const registrations = await CourseRegistration.find()
     .populate({
       path: 'courseId',
-      select: 'title slug',
+      select: 'title slug sessionTime location',
       model: 'Course'
     })
     .populate({
@@ -134,7 +134,9 @@ export async function getAllRegistrations() {
         try {
           const courseId = typeof result.courseId === 'string' ? result.courseId : result.courseId?._id || result.courseId;
           if (courseId) {
-            const course = await Course.findById(courseId).select('title slug').lean();
+            const course = await Course.findById(courseId)
+              .select('title slug sessionTime location')
+              .lean();
             result.courseId = course || null;
           } else {
             result.courseId = null;
@@ -173,7 +175,7 @@ export async function getAllRegistrations() {
  */
 export async function getRegistrationsByCourse(courseId) {
   return await CourseRegistration.find({ courseId })
-    .populate('courseId', 'title slug')
+    .populate('courseId', 'title slug sessionTime location')
     .populate('userId', 'firstName lastName email phoneNumber')
     .sort({ createdAt: -1 })
     .lean();
@@ -184,7 +186,7 @@ export async function getRegistrationsByCourse(courseId) {
  */
 export async function getRegistrationsByUser(userId) {
   return await CourseRegistration.find({ userId })
-    .populate('courseId', 'title slug')
+    .populate('courseId', 'title slug sessionTime location')
     .populate('userId', 'firstName lastName email phoneNumber')
     .sort({ createdAt: -1 })
     .lean();
@@ -211,7 +213,7 @@ export async function updateRegistrationStatus(registrationId, status, notes = '
   await reg.save();
 
   await reg.populate([
-    { path: 'courseId', select: 'title slug' },
+    { path: 'courseId', select: 'title slug sessionTime location' },
     { path: 'userId', select: 'firstName lastName email phoneNumber name' },
   ]);
 
@@ -228,6 +230,14 @@ export async function updateRegistrationStatus(registrationId, status, notes = '
       course && typeof course === 'object' && course.title ? course.title : 'Course';
     const courseSlug =
       course && typeof course === 'object' && course.slug ? String(course.slug) : '';
+    const courseSessionTime =
+      course && typeof course === 'object' && course.sessionTime != null
+        ? String(course.sessionTime).trim()
+        : '';
+    const courseLocation =
+      course && typeof course === 'object' && course.location != null
+        ? String(course.location).trim()
+        : '';
 
     if (userEmail) {
       emailSent = await sendCourseRegistrationStatusEmail({
@@ -238,6 +248,8 @@ export async function updateRegistrationStatus(registrationId, status, notes = '
         status,
         notes: reg.notes || '',
         sessionDateKey: reg.sessionDateKey || '',
+        courseSessionTime,
+        courseLocation,
       });
       if (!emailSent) {
         console.error('Course registration status email failed for', userEmail);
@@ -256,7 +268,7 @@ export async function updateRegistrationStatus(registrationId, status, notes = '
  */
 export async function getRegistrationById(registrationId) {
   const registration = await CourseRegistration.findById(registrationId)
-    .populate('courseId', 'title slug')
+    .populate('courseId', 'title slug sessionTime location')
     .populate('userId', 'firstName lastName email phoneNumber')
     .lean();
 
@@ -275,7 +287,7 @@ export async function getUserCourseRegistration(courseId, userId) {
     courseId,
     userId,
   })
-    .populate('courseId', 'title slug')
+    .populate('courseId', 'title slug sessionTime location')
     .populate('userId', 'firstName lastName email phoneNumber')
     .lean();
 

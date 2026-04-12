@@ -108,6 +108,9 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
+const DETAIL_TBD_EN = 'To be confirmed';
+const DETAIL_TBD_AR = 'سيتم التأكيد لاحقًا';
+
 function formatSessionDateForEmail(sessionDateKey) {
   const key = sessionDateKey == null ? '' : String(sessionDateKey).trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) return { en: '', ar: '' };
@@ -163,6 +166,150 @@ function courseRegistrationStatusCopy(status) {
     },
   };
   return map[status] || map.pending;
+}
+
+/**
+ * Confirmed booking email (bilingual) — matches center template; uses registration date + course time/location.
+ */
+function buildPaidBookingConfirmationEmail({
+  name,
+  courseTitle,
+  courseSlug,
+  sessionDateKey,
+  courseSessionTime,
+  courseLocation,
+  notes,
+}) {
+  const safeName = escapeHtml(name || 'Participant');
+  const safeTitle = escapeHtml(courseTitle || 'Course');
+  const baseUrl = (config.frontendUrl || 'http://localhost:5173').replace(/\/$/, '');
+  const coursePath = courseSlug ? `/courses/${encodeURI(courseSlug)}` : '/courses';
+  const courseUrl = `${baseUrl}${coursePath}`;
+
+  const { en: sessionEn, ar: sessionAr } = formatSessionDateForEmail(sessionDateKey);
+  const dateEn = sessionEn || DETAIL_TBD_EN;
+  const dateAr = sessionAr || DETAIL_TBD_AR;
+  const timeEn = String(courseSessionTime || '').trim() || DETAIL_TBD_EN;
+  const timeAr = String(courseSessionTime || '').trim() || DETAIL_TBD_AR;
+  const locEn = String(courseLocation || '').trim() || DETAIL_TBD_EN;
+  const locAr = String(courseLocation || '').trim() || DETAIL_TBD_AR;
+
+  const safeTimeEn = escapeHtml(timeEn);
+  const safeTimeAr = escapeHtml(timeAr);
+  const safeLocEn = escapeHtml(locEn);
+  const safeLocAr = escapeHtml(locAr);
+  const safeDateEn = escapeHtml(dateEn);
+  const safeDateAr = escapeHtml(dateAr);
+
+  const rawNotes = notes && String(notes).trim() ? String(notes).trim() : '';
+  const safeNotesHtml = rawNotes
+    ? `<p style="margin:16px 0 0 0;padding:14px;background:#f7fafc;border-radius:8px;color:#2d3748;font-size:14px;line-height:1.6;"><strong>Message from our team:</strong><br>${escapeHtml(rawNotes).replace(/\n/g, '<br>')}</p>`
+    : '';
+  const notesTextEn = rawNotes ? `\nMessage from our team:\n${rawNotes}\n` : '';
+  const notesTextAr = rawNotes ? `\nملاحظة من الفريق:\n${rawNotes}\n` : '';
+
+  const text = [
+    `Dear ${name || 'Participant'},`,
+    '',
+    `Your booking for the course "${courseTitle}" at the ${ORG_NAME_EN} is confirmed.`,
+    '',
+    'Please find below the details:',
+    `Course: ${courseTitle}`,
+    `Date: ${dateEn}`,
+    `Time: ${timeEn}`,
+    `Location: ${locEn}`,
+    notesTextEn,
+    'If you wish to reschedule or cancel your booking, please contact us at any time.',
+    '',
+    'We look forward to having you with us.',
+    '',
+    'Best regards,',
+    ORG_NAME_EN,
+    '',
+    '———',
+    '',
+    'عزيزي/عزيزتي،',
+    '',
+    `تم تأكيد حجزك لدورة «${courseTitle}» في ${ORG_NAME_AR}.`,
+    '',
+    'تفاصيل الدورة:',
+    `الدورة: ${courseTitle}`,
+    `التاريخ: ${dateAr}`,
+    `الوقت: ${timeAr}`,
+    `الموقع: ${locAr}`,
+    notesTextAr,
+    'في حال رغبتك في إعادة الجدولة أو الإلغاء، يرجى التواصل معنا في أي وقت.',
+    '',
+    'نتطلع لحضورك معنا.',
+    '',
+    'تحياتنا،',
+    ORG_NAME_AR,
+    '',
+    `View course: ${courseUrl}`,
+  ].join('\n');
+
+  const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Booking confirmed</title>
+        </head>
+        <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;">
+          <table role="presentation" style="width:100%;border-collapse:collapse;">
+            <tr>
+              <td align="center" style="padding:40px 20px;">
+                <table role="presentation" style="max-width:560px;width:100%;background:#fff;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,.08);">
+                  <tr>
+                    <td style="padding:32px;">
+                      <p style="margin:0 0 12px;color:#1a202c;font-size:16px;line-height:1.6;">Dear <strong>${safeName}</strong>,</p>
+                      <p style="margin:0 0 16px;color:#2d3748;font-size:16px;line-height:1.65;">Your booking for the course <strong>${safeTitle}</strong> at the <strong>${ORG_NAME_EN}</strong> is confirmed.</p>
+                      <p style="margin:0 0 10px;color:#1a202c;font-size:15px;font-weight:600;">Please find below the details:</p>
+                      <table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 16px 0;font-size:15px;line-height:1.65;color:#2d3748;">
+                        <tr><td style="padding:4px 0;"><strong>Course:</strong></td><td style="padding:4px 0;">${safeTitle}</td></tr>
+                        <tr><td style="padding:4px 0;"><strong>Date:</strong></td><td style="padding:4px 0;">${safeDateEn}</td></tr>
+                        <tr><td style="padding:4px 0;"><strong>Time:</strong></td><td style="padding:4px 0;">${safeTimeEn}</td></tr>
+                        <tr><td style="padding:4px 0;vertical-align:top;"><strong>Location:</strong></td><td style="padding:4px 0;">${safeLocEn}</td></tr>
+                      </table>
+                      ${safeNotesHtml}
+                      <p style="margin:16px 0 0 0;color:#2d3748;font-size:15px;line-height:1.65;">If you wish to reschedule or cancel your booking, please contact us at any time.</p>
+                      <p style="margin:12px 0 0 0;color:#2d3748;font-size:15px;line-height:1.65;">We look forward to having you with us.</p>
+                      <p style="margin:20px 0 0 0;color:#2d3748;font-size:16px;line-height:1.6;">Best regards,<br><strong>${ORG_NAME_EN}</strong></p>
+                      <p style="margin:16px 0 0 0;font-size:14px;"><a href="${courseUrl}" style="color:#2b6cb0;">View course on our website</a></p>
+                      <hr style="border:none;border-top:1px solid #e2e8f0;margin:28px 0;">
+                      <div dir="rtl" style="text-align:right;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,'Tahoma',sans-serif;">
+                        <p style="margin:0 0 12px;color:#1a202c;font-size:16px;line-height:1.75;">عزيزي/عزيزتي،</p>
+                        <p style="margin:0 0 16px;color:#2d3748;font-size:16px;line-height:1.75;">تم تأكيد حجزك لدورة <strong>${safeTitle}</strong> في <strong>${ORG_NAME_AR}</strong>.</p>
+                        <p style="margin:0 0 10px;color:#1a202c;font-size:15px;font-weight:600;">تفاصيل الدورة:</p>
+                        <table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 16px 0;font-size:15px;line-height:1.75;color:#2d3748;">
+                          <tr><td style="padding:4px 0;"><strong>الدورة:</strong></td><td style="padding:4px 0;">${safeTitle}</td></tr>
+                          <tr><td style="padding:4px 0;"><strong>التاريخ:</strong></td><td style="padding:4px 0;">${safeDateAr}</td></tr>
+                          <tr><td style="padding:4px 0;"><strong>الوقت:</strong></td><td style="padding:4px 0;">${safeTimeAr}</td></tr>
+                          <tr><td style="padding:4px 0;vertical-align:top;"><strong>الموقع:</strong></td><td style="padding:4px 0;">${safeLocAr}</td></tr>
+                        </table>
+                        ${rawNotes ? `<p style="margin:16px 0 0 0;padding:14px;background:#f7fafc;border-radius:8px;color:#2d3748;font-size:14px;line-height:1.75;text-align:right;"><strong>ملاحظة من الفريق:</strong><br>${escapeHtml(rawNotes).replace(/\n/g, '<br>')}</p>` : ''}
+                        <p style="margin:16px 0 0 0;color:#2d3748;font-size:15px;line-height:1.75;">في حال رغبتك في إعادة الجدولة أو الإلغاء، يرجى التواصل معنا في أي وقت.</p>
+                        <p style="margin:12px 0 0 0;color:#2d3748;font-size:15px;line-height:1.75;">نتطلع لحضورك معنا.</p>
+                        <p style="margin:20px 0 0 0;color:#2d3748;font-size:16px;line-height:1.75;">تحياتنا،<br><strong>${ORG_NAME_AR}</strong></p>
+                        <p style="margin:16px 0 0 0;font-size:14px;"><a href="${courseUrl}" style="color:#2b6cb0;">عرض الدورة على الموقع</a></p>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:16px 32px;background:#f7fafc;border-radius:0 0 12px 12px;text-align:center;">
+                      <p style="margin:0;color:#a0aec0;font-size:12px;">Automated message — course booking</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `;
+
+  return { text, html, subject: `Course booking confirmed — ${courseTitle}` };
 }
 
 // ---------------------------------------------------------------------------
@@ -386,12 +533,29 @@ export async function sendCourseRegistrationStatusEmail({
   status,
   notes = '',
   sessionDateKey = '',
+  courseSessionTime = '',
+  courseLocation = '',
 }) {
   try {
     if (!isEmailConfigured()) {
       console.error('Email configuration missing. Cannot send course registration email.');
       return false;
     }
+
+    if (status === 'paid') {
+      const { text, html, subject } = buildPaidBookingConfirmationEmail({
+        name,
+        courseTitle,
+        courseSlug,
+        sessionDateKey,
+        courseSessionTime,
+        courseLocation,
+        notes,
+      });
+      await deliverMail({ to, subject, text, html });
+      return true;
+    }
+
     const copy = courseRegistrationStatusCopy(status);
     const safeName = escapeHtml(name || 'Participant');
     const safeTitle = escapeHtml(courseTitle || 'Course');
