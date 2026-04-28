@@ -2,6 +2,12 @@ import nodemailer from 'nodemailer';
 
 let transporter = null;
 
+function isTruthyEnv(val) {
+  if (val === true || val === 1) return true;
+  if (typeof val === 'string') return val.toLowerCase() === 'true' || val === '1';
+  return false;
+}
+
 function escapeHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;')
@@ -11,16 +17,32 @@ function escapeHtml(s) {
 }
 
 function getTransporter() {
-  const user = process.env.MAIL_USER?.trim();
-  const pass = process.env.MAIL_PASS;
+  const user = (process.env.MAIL_USER || process.env.EMAIL_USER || '').trim();
+  const pass = process.env.MAIL_PASS || process.env.EMAIL_PASS;
   if (!user || !pass) {
     return null;
   }
+
+  const host = (
+    process.env.EMAIL_HOST ||
+    process.env.MAIL_SMTP_HOST ||
+    'smtp.gmail.com'
+  ).trim();
+  const defaultPort = host.includes('gmail') ? '587' : '465';
+  const port = parseInt(
+    process.env.EMAIL_PORT || process.env.MAIL_SMTP_PORT || defaultPort,
+    10
+  );
+  const secure =
+    isTruthyEnv(process.env.EMAIL_SECURE) ||
+    isTruthyEnv(process.env.MAIL_SMTP_SECURE) ||
+    port === 465;
+
   if (!transporter) {
     transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
+      host,
+      port,
+      secure,
       auth: { user, pass },
     });
   }
@@ -38,8 +60,8 @@ function resolveUserDisplayName(user) {
 }
 
 /**
- * Notify admin of a new registration via Gmail SMTP.
- * Requires: MAIL_USER, MAIL_PASS (Gmail App Password), ADMIN_EMAIL
+ * Notify admin of a new registration via SMTP (EMAIL_* / Hostinger or MAIL_SMTP_* / Gmail).
+ * Requires: ADMIN_EMAIL; auth: MAIL_USER+MAIL_PASS or EMAIL_USER+EMAIL_PASS
  *
  * @param {{ firstName?: string; lastName?: string; name?: string; email: string }} user
  * @returns {Promise<void>}
@@ -47,12 +69,12 @@ function resolveUserDisplayName(user) {
  */
 export async function sendAdminNotification(user) {
   const adminEmail = process.env.ADMIN_EMAIL?.trim();
-  const mailUser = process.env.MAIL_USER?.trim();
+  const mailUser = (process.env.MAIL_USER || process.env.EMAIL_USER || '').trim();
   const transport = getTransporter();
 
   if (!adminEmail || !transport || !mailUser) {
     console.warn(
-      '[mailer] sendAdminNotification skipped: set MAIL_USER, MAIL_PASS, and ADMIN_EMAIL'
+      '[mailer] sendAdminNotification skipped: set ADMIN_EMAIL and SMTP credentials (MAIL_* or EMAIL_*)'
     );
     return;
   }
