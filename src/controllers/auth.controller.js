@@ -1,6 +1,7 @@
 import { ok, fail } from '../utils/response.js';
 import * as authService from '../services/auth.service.js';
 import { sendWelcomeEmail } from '../services/emailService.js';
+import { sendAdminNotification } from '../services/mailer.js';
 
 export async function login(req, res) {
   try {
@@ -24,6 +25,12 @@ export async function signup(req, res) {
       });
     } catch {
       emailSent = false;
+    }
+
+    try {
+      await sendAdminNotification(result.user);
+    } catch (err) {
+      console.error('[auth] Admin notification email failed:', err?.message || err);
     }
 
     const message = emailSent

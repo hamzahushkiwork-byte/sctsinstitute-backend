@@ -47,9 +47,7 @@ Confirm the following endpoints work:
 Check the Railway logs for:
 - `🚀 Server running on port 8080`
 - `✅ MongoDB connected`
-- After signup: `Welcome email sent successfully:` or `Email configuration missing. Cannot send welcome email.` / `Failed to send welcome email:`
-
-## SMTP smoke test (optional)
+- After signup: `Welcome email sent successfully:` or `Email configuration missing. Cannot send welcome email.` / `Failed to send welcome email:`## SMTP smoke test (optional)
 After setting all `EMAIL_*` variables, redeploy, then:
 - **Development**: `GET https://<backend>/test-email?to=your@email.com`
 - **Production**: same URL plus `&secret=<TEST_EMAIL_SECRET>` when `TEST_EMAIL_SECRET` is set.
