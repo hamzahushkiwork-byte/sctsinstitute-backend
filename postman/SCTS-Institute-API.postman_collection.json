@@ -1,0 +1,792 @@
+{
+  "info": {
+    "_postman_id": "scts-institute-api-collection",
+    "name": "SCTS Institute API",
+    "description": "Import this file in Postman (Import → File). Then import an environment from the same `postman/` folder and select it in the top-right.\n\n**Dynamic base URL:** every request uses `{{baseUrl}}`. Change `baseUrl` in the active environment (local vs staging vs production) without editing requests.\n\n**Auth:** set `userEmail` and `userPassword` in the environment, run **Auth → Login**. Tests on that request save `accessToken` and `refreshToken` to the environment. Admin and protected folders send `Authorization: Bearer {{accessToken}}`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Server",
+      "item": [
+        {
+          "name": "Root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/"
+          },
+          "response": []
+        },
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          },
+          "response": []
+        },
+        {
+          "name": "OpenAPI JSON",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/openapi.json"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "API v1 — Public",
+      "item": [
+        {
+          "name": "V1 Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/health"
+          },
+          "response": []
+        },
+        {
+          "name": "Home — Hero slides",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/home/hero-slides"
+          },
+          "response": []
+        },
+        {
+          "name": "Services — List (active)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/services"
+          },
+          "response": []
+        },
+        {
+          "name": "Services — By slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/services/{{serviceSlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Certification — List (active)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certification"
+          },
+          "response": []
+        },
+        {
+          "name": "Certification — By slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certification/{{certSlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Courses — List (active)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/courses"
+          },
+          "response": []
+        },
+        {
+          "name": "Courses — By slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseSlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Partners — List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/partners"
+          },
+          "response": []
+        },
+        {
+          "name": "Partners — Public",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/partners/public"
+          },
+          "response": []
+        },
+        {
+          "name": "Pages — By key",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/pages/{{pageKey}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "API v1 — Auth",
+      "item": [
+        {
+          "name": "Login (saves tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.success && json.data) {",
+                  "    if (json.data.accessToken) pm.environment.set('accessToken', json.data.accessToken);",
+                  "    if (json.data.refreshToken) pm.environment.set('refreshToken', json.data.refreshToken);",
+                  "  }",
+                  "} catch (e) { /* ignore */ }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "response": []
+        },
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"{{userEmail}}\",\n  \"phoneNumber\": \"+1 555 0100\",\n  \"password\": \"Str0ng!Pass\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/signup"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh (updates accessToken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.success && json.data && json.data.accessToken) {",
+                  "    pm.environment.set('accessToken', json.data.accessToken);",
+                  "  }",
+                  "} catch (e) { /* ignore */ }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/forgot-password"
+          },
+          "response": []
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"otp\": \"123456\",\n  \"password\": \"Str0ng!New\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/reset-password"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "API v1 — Contact",
+      "item": [
+        {
+          "name": "Submit contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"visitor@example.com\",\n  \"phone\": \"+1 555 0199\",\n  \"subject\": \"Hello\",\n  \"message\": \"Message from Postman\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/contact"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "API v1 — Course registrations (Bearer)",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Register for course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"sessionDateKey\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/course-registrations/register"
+          },
+          "response": []
+        },
+        {
+          "name": "My registrations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/course-registrations/my-registrations"
+          },
+          "response": []
+        },
+        {
+          "name": "My registration for course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/course-registrations/course/{{courseId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "List all (admin guard in app)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/course-registrations/admin"
+          },
+          "response": []
+        },
+        {
+          "name": "By course (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/course-registrations/admin/course/{{courseId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update status (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"pending\",\n  \"notes\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/course-registrations/admin/{{registrationId}}/status"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "API v1 — Admin (Bearer)",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Hero slides",
+          "item": [
+            {
+              "name": "List hero slides",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/hero-slides"
+              },
+              "response": []
+            },
+            {
+              "name": "Get hero slide by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Create hero slide",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"image\",\n  \"title\": \"Postman test\",\n  \"mediaUrl\": \"https://example.com/banner.jpg\",\n  \"order\": 0,\n  \"isActive\": true\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/hero-slides"
+              },
+              "response": []
+            },
+            {
+              "name": "Update hero slide",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"image\",\n  \"title\": \"Updated\",\n  \"mediaUrl\": \"https://example.com/banner2.jpg\",\n  \"order\": 1,\n  \"isActive\": true\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete hero slide",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Services (admin CRUD)",
+          "item": [
+            {
+              "name": "List services",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/services"
+              },
+              "response": []
+            },
+            {
+              "name": "Get service by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Toggle service active",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}/active"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete service",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Courses (admin CRUD)",
+          "item": [
+            {
+              "name": "List courses",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/courses"
+              },
+              "response": []
+            },
+            {
+              "name": "Get course by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Toggle course availability",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}/toggle-availability"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete course",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Partners (admin CRUD)",
+          "item": [
+            {
+              "name": "List partners",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/partners"
+              },
+              "response": []
+            },
+            {
+              "name": "Get partner by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/partners/{{mongoId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete partner",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/partners/{{mongoId}}"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Certification (admin CRUD)",
+          "item": [
+            {
+              "name": "List certification services",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/certification"
+              },
+              "response": []
+            },
+            {
+              "name": "Get certification by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Toggle certification active",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}/active"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete certification",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Pages & contact & users",
+          "item": [
+            {
+              "name": "List pages",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/pages"
+              },
+              "response": []
+            },
+            {
+              "name": "Get page by key",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/pages/{{pageKey}}"
+              },
+              "response": []
+            },
+            {
+              "name": "List contact messages",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/contact-messages"
+              },
+              "response": []
+            },
+            {
+              "name": "Get contact message by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/contact-messages/{{mongoId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "Update contact message",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"read\"\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/contact-messages/{{mongoId}}"
+              },
+              "response": []
+            },
+            {
+              "name": "List users",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/users"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Broadcast & uploads & course regs",
+          "item": [
+            {
+              "name": "Send broadcast email (admin role)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"subject\": \"Test from Postman\",\n  \"text\": \"Hello from API test.\",\n  \"html\": \"\",\n  \"includeAdmins\": false\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/broadcast-emails"
+              },
+              "response": []
+            },
+            {
+              "name": "Broadcast email logs",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/broadcast-emails"
+              },
+              "response": []
+            },
+            {
+              "name": "List course registrations (admin)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/course-registrations"
+              },
+              "response": []
+            },
+            {
+              "name": "Update course registration status (admin)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"paid\",\n  \"notes\": \"\"\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/course-registrations/{{registrationId}}/status"
+              },
+              "response": []
+            },
+            {
+              "name": "Upload file (multipart field: file)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/v1/admin/uploads"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

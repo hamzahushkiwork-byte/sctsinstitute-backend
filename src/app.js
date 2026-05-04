@@ -173,7 +173,7 @@ app.get("/health", (req, res) => {
  * Root endpoint - health/status
  */
 app.get("/", (req, res) => {
-  res.status(200).json({ ok: true, service: "sctsinstitute-backend" });
+  res.status(200).json({ ok: true, service: "sctsinstitute-backenddddddd" });
 });
 
 // ===== Test email (SMTP check) START =====
