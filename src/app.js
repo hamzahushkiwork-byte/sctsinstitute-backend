@@ -11,6 +11,7 @@ import routes from "./routes/index.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import notFoundMiddleware from "./middlewares/notfound.middleware.js";
 import config from "./config/env.js";
+import { getUploadRoot } from "./utils/uploadRoot.js";
 import { sendTestEmail } from "./services/emailService.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -100,10 +101,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 /**
- * Serve uploads as static files - MUST be before API routes and 404 handler
- * Use process.cwd() for Render compatibility
+ * Serve uploads as static files - MUST be before API routes and 404 handler (same root as multer — UPLOAD_DIR)
  */
-const uploadDir = path.join(process.cwd(), config.uploadDir || "uploads");
+const uploadDir = getUploadRoot();
 
 // Serve static uploads with CORS headers
 app.use(

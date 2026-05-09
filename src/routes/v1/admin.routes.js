@@ -12,12 +12,11 @@ import partnersAdminRoutes from '../admin/partners.routes.js';
 import servicesAdminRoutes from '../admin/services.routes.js';
 import certificationAdminRoutes from '../admin/certification.admin.routes.js';
 import coursesAdminRoutes from '../admin/courses.admin.routes.js';
-import config from '../../config/env.js';
+import { getUploadRoot } from '../../utils/uploadRoot.js';
 
 const router = express.Router();
 
-// Ensure uploads directory exists (repo root - same path used by static middleware)
-const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
+const uploadDir = getUploadRoot();
 if (!existsSync(uploadDir)) {
   mkdirSync(uploadDir, { recursive: true });
 }

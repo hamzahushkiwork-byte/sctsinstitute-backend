@@ -1,10 +1,9 @@
 import multer from 'multer';
 import path from 'path';
 import { existsSync, mkdirSync } from 'fs';
-import config from '../config/env.js';
+import { getUploadRoot } from '../utils/uploadRoot.js';
 
-// Use process.cwd() for Render compatibility - same as static middleware
-const uploadsDir = path.join(process.cwd(), config.uploadDir || 'uploads');
+const uploadsDir = getUploadRoot();
 
 // Ensure uploads directory exists
 if (!existsSync(uploadsDir)) {

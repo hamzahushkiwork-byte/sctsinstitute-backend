@@ -1,10 +1,9 @@
-import path from 'path';
 import Partner from '../models/Partner.model.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
-import config from '../config/env.js';
+import { getUploadRoot } from '../utils/uploadRoot.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -87,7 +86,7 @@ export async function deletePartner(id) {
         ? partner.logoUrl.replace('/uploads/', '')
         : partner.logoUrl;
       
-      const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
+      const uploadDir = getUploadRoot();
       const filePath = join(uploadDir, logoPath);
       
       if (existsSync(filePath)) {

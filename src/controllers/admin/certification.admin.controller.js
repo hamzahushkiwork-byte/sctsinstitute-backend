@@ -1,11 +1,10 @@
-import path from 'path';
 import { ok, fail } from '../../utils/response.js';
 import CertificationService from '../../models/CertificationService.model.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { unlink } from 'fs/promises';
 import { existsSync } from 'fs';
-import config from '../../config/env.js';
+import { getUploadRoot } from '../../utils/uploadRoot.js';
 import { slugify, generateUniqueSlug } from '../../utils/slug.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -227,7 +226,7 @@ export async function updateCertificationService(req, res) {
           ? oldUrl.replace('/uploads/', '')
           : oldUrl;
         
-        const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
+        const uploadDir = getUploadRoot();
         const filePath = join(uploadDir, imagePath);
         
         if (existsSync(filePath)) {
@@ -309,7 +308,7 @@ export async function deleteCertificationService(req, res) {
           ? imageUrl.replace('/uploads/', '')
           : imageUrl;
         
-        const uploadDir = path.join(process.cwd(), config.uploadDir || 'uploads');
+        const uploadDir = getUploadRoot();
         const filePath = join(uploadDir, imagePath);
         
         if (existsSync(filePath)) {

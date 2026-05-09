@@ -5,14 +5,21 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
+import config from "./config/env.js";
+import { getUploadRoot } from "./utils/uploadRoot.js";
+import app from "./app.js";
+import { connectDB } from "./config/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Ensure uploads folder exists on startup (repo root: backend/uploads)
-const uploadRoot = path.join(process.cwd(), "uploads");
+const uploadRoot = getUploadRoot();
 if (!fs.existsSync(uploadRoot)) {
   fs.mkdirSync(uploadRoot, { recursive: true });
+}
+const partnersRoot = path.join(uploadRoot, "partners");
+if (!fs.existsSync(partnersRoot)) {
+  fs.mkdirSync(partnersRoot, { recursive: true });
 }
 
 const envPath = join(__dirname, "..", ".env");
@@ -30,11 +37,6 @@ if (process.env.NODE_ENV === "development") {
     envPath,
   });
 }
-
-
-import app from "./app.js";
-import config from "./config/env.js";
-import { connectDB } from "./config/db.js";
 
 
 const PORT = process.env.PORT || config.port || 8080;
@@ -56,6 +58,7 @@ async function startServer() {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📡 Environment: ${config.nodeEnv}`);
+    console.log(`📁 Uploads directory: ${getUploadRoot()}`);
     console.log(`🔗 Health check available at /`);
     const hasResend = !!process.env.RESEND_API_KEY;
     const hasSmtp =

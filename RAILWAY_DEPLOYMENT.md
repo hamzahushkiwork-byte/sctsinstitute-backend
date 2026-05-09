@@ -32,7 +32,13 @@ Railway uses dynamic IPs, so you must allow all IPs (`0.0.0.0/0`) for Atlas to a
    - `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM`, `FRONTEND_URL` — **required for signup welcome emails** (Hostinger-style: port `465` + `EMAIL_SECURE=true`, or port `587` + `EMAIL_SECURE=false` with STARTTLS).
    - `FRONTEND_URL`: Public site URL used in the welcome email sign-in link (must match your deployed frontend).
    - `TEST_EMAIL_SECRET` (optional): If set in production, enables `GET /test-email?to=you@example.com&secret=<value>` for SMTP smoke tests. If unset in production, `/test-email` returns 403.
-4. **Networking**:
+   - **`UPLOAD_DIR`** (strongly recommended in production): Set to **`media`** if you mount a Railway volume at **`/app/media`**, so uploads survive redeploys. Without a volume + matching `UPLOAD_DIR`, files are stored on ephemeral disk only.
+4. **Persistent uploads (Railway Volume)** — add a volume or uploads **will be lost on every deploy**:
+   - Service → **Volumes** → Add volume → mount path **`/app/media`** (example).
+   - Set **`UPLOAD_DIR=media`** (with cwd `/app` this resolves to `/app/media`).
+   - Or **`UPLOAD_DIR=/app/media`** explicitly.
+   - Public URLs stay `/uploads/...`; the server maps them to `UPLOAD_DIR`.
+5. **Networking**:
    - Go to **Service > Settings > Domains**.
    - Click **Generate Domain**.
    - Railway will provide a public URL like `https://sctsinstitute-backend-production.up.railway.app`.
