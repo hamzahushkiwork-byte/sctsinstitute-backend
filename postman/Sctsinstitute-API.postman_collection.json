@@ -1,1437 +1,1132 @@
 {
-	"info": {
-		"_postman_id": "sctsinstitute-api-v1",
-		"name": "Sctsinstitute API (v1)",
-		"description": "API collection for Sctsinstitute backend",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Health",
-			"item": [
-				{
-					"name": "Health Check",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{api_v1}}/health",
-							"host": ["{{api_v1}}"],
-							"path": ["health"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Home",
-			"item": [
-				{
-					"name": "Get Hero Slides",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{api_v1}}/home/hero-slides",
-							"host": ["{{api_v1}}"],
-							"path": ["home", "hero-slides"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create Hero Slide (Admin)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"type\": \"image\",\n  \"title\": \"Slide Title\",\n  \"subtitle\": \"Slide subtitle\",\n  \"mediaUrl\": \"/uploads/slide.jpg\",\n  \"buttonText\": \"Read More\",\n  \"buttonLink\": \"/services\",\n  \"order\": 1,\n  \"isActive\": true\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{api_v1}}/home/hero-slides",
-							"host": ["{{api_v1}}"],
-							"path": ["home", "hero-slides"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Services (Public)",
-			"item": [
-				{
-					"name": "Get All Services",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{api_v1}}/services",
-							"host": ["{{api_v1}}"],
-							"path": ["services"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Service by Slug",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{api_v1}}/services/{{service_slug}}",
-							"host": ["{{api_v1}}"],
-							"path": ["services", "{{service_slug}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Courses (Public)",
-			"item": [
-				{
-					"name": "Get All Courses",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{api_v1}}/courses",
-							"host": ["{{api_v1}}"],
-							"path": ["courses"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Course by Slug",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{api_v1}}/courses/{{course_slug}}",
-							"host": ["{{api_v1}}"],
-							"path": ["courses", "{{course_slug}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Partners (Public)",
-			"item": [
-				{
-					"name": "Get All Partners",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{api_v1}}/partners",
-							"host": ["{{api_v1}}"],
-							"path": ["partners"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Pages (Public)",
-			"item": [
-				{
-					"name": "Get Page Content",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{api_v1}}/pages/{{page_key}}",
-							"host": ["{{api_v1}}"],
-							"path": ["pages", "{{page_key}}"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Contact (Public)",
-			"item": [
-				{
-					"name": "Submit Contact Form",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"phone\": \"+962790000000\",\n  \"subject\": \"Testing Contact\",\n  \"message\": \"Hello, this is a test message from Postman.\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{api_v1}}/contact",
-							"host": ["{{api_v1}}"],
-							"path": ["contact"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Auth",
-			"item": [
-				{
-					"name": "Sign Up",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data.accessToken) {",
-									"        pm.environment.set('access_token', jsonData.data.accessToken);",
-									"    }",
-									"    if (jsonData.data && jsonData.data.refreshToken) {",
-									"        pm.environment.set('refresh_token', jsonData.data.refreshToken);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin2@sctsinstitute.com\",\n  \"password\": \"Admin@12345\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{api_v1}}/auth/signup",
-							"host": ["{{api_v1}}"],
-							"path": ["auth", "signup"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data.accessToken) {",
-									"        pm.environment.set('access_token', jsonData.data.accessToken);",
-									"    }",
-									"    if (jsonData.data && jsonData.data.refreshToken) {",
-									"        pm.environment.set('refresh_token', jsonData.data.refreshToken);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"admin@sctsinstitute.com\",\n  \"password\": \"Admin@12345\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{api_v1}}/auth/login",
-							"host": ["{{api_v1}}"],
-							"path": ["auth", "login"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Refresh Token",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data.accessToken) {",
-									"        pm.environment.set('access_token', jsonData.data.accessToken);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{api_v1}}/auth/refresh",
-							"host": ["{{api_v1}}"],
-							"path": ["auth", "refresh"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Logout",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    pm.environment.set('access_token', '');",
-									"    pm.environment.set('refresh_token', '');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{api_v1}}/auth/logout",
-							"host": ["{{api_v1}}"],
-							"path": ["auth", "logout"]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Admin (Protected)",
-			"item": [
-				{
-					"name": "Hero Slides CRUD",
-					"item": [
-						{
-							"name": "Get All Hero Slides",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/hero-slides",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "hero-slides"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Get Hero Slide by ID",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/hero-slides/{{slide_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "hero-slides", "{{slide_id}}"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create Hero Slide",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"type\": \"image\",\n  \"title\": \"Slide Title\",\n  \"subtitle\": \"Slide subtitle\",\n  \"mediaUrl\": \"/uploads/slide.jpg\",\n  \"buttonText\": \"Read More\",\n  \"buttonLink\": \"/services\",\n  \"order\": 1,\n  \"isActive\": true\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/hero-slides",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "hero-slides"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Update Hero Slide",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"title\": \"Updated Slide Title\",\n  \"subtitle\": \"Updated subtitle\",\n  \"order\": 2,\n  \"isActive\": true\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/hero-slides/{{slide_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "hero-slides", "{{slide_id}}"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Delete Hero Slide",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/hero-slides/{{slide_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "hero-slides", "{{slide_id}}"]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Services CRUD",
-					"item": [
-						{
-							"name": "Get All Services",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/services",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "services"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Get Service by ID",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/services/{{service_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "services", "{{service_id}}"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create Service",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"title\": \"Life Support Training\",\n  \"slug\": \"life-support-training\",\n  \"shortDescription\": \"Short description\",\n  \"fullDescription\": \"Full description\",\n  \"cardImage\": \"/uploads/service-card.jpg\",\n  \"heroImage\": \"/uploads/service-hero.jpg\",\n  \"order\": 1,\n  \"isActive\": true,\n  \"sections\": [\n    {\n      \"id\": \"s1\",\n      \"title\": \"Section Title\",\n      \"description\": \"Section description\",\n      \"featuredCourses\": [\"ACLS\", \"BLS\"],\n      \"image\": \"/uploads/section.jpg\"\n    }\n  ]\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/services",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "services"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Update Service",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"shortDescription\": \"Updated short description\",\n  \"order\": 2,\n  \"isActive\": true\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/services/{{service_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "services", "{{service_id}}"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Delete Service",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/services/{{service_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "services", "{{service_id}}"]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Courses CRUD",
-					"item": [
-						{
-							"name": "Get All Courses",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/courses",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "courses"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Get Course by ID",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/courses/{{course_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "courses", "{{course_id}}"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create Course",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"category\": \"Continuing Education\",\n  \"title\": \"Example Course\",\n  \"slug\": \"example-course\",\n  \"description\": \"Course description\",\n  \"image\": \"/uploads/course.jpg\",\n  \"level\": \"Beginner\",\n  \"duration\": \"3 days\",\n  \"price\": 0,\n  \"tags\": [\"CME\", \"Medical\"],\n  \"isActive\": true\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/courses",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "courses"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Update Course",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"title\": \"Updated Course Title\",\n  \"isActive\": true\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/courses/{{course_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "courses", "{{course_id}}"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Delete Course",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/courses/{{course_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "courses", "{{course_id}}"]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Partners CRUD",
-					"item": [
-						{
-							"name": "Get All Partners",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/partners",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "partners"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Get Partner by ID",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/partners/{{partner_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "partners", "{{partner_id}}"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create Partner",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"name\": \"Partner Name\",\n  \"logoUrl\": \"/uploads/partner.png\",\n  \"websiteUrl\": \"https://example.com\",\n  \"order\": 1,\n  \"isActive\": true\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/partners",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "partners"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Update Partner",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"order\": 2,\n  \"isActive\": true\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/partners/{{partner_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "partners", "{{partner_id}}"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Delete Partner",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/partners/{{partner_id}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "partners", "{{partner_id}}"]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Page Content CRUD",
-					"item": [
-						{
-							"name": "Get All Page Content",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/pages",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "pages"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Get Page Content by Key",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/pages/{{page_key}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "pages", "{{page_key}}"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create Page Content",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"key\": \"about\",\n  \"title\": \"About Page Content\",\n  \"contentJson\": {\n    \"sections\": []\n  },\n  \"isActive\": true\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/pages",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "pages"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Update Page Content",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"title\": \"Updated About Page\",\n  \"contentJson\": {\n    \"sections\": [\n      {\n        \"type\": \"text\",\n        \"title\": \"Our Mission\",\n        \"body\": \"...\"\n      }\n    ]\n  },\n  \"isActive\": true\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/pages/{{page_key}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "pages", "{{page_key}}"]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Delete Page Content",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{api_v1}}/admin/pages/{{page_key}}",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "pages", "{{page_key}}"]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Upload",
-					"item": [
-						{
-							"name": "Upload File",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{access_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "file",
-											"type": "file",
-											"src": []
-										}
-									]
-								},
-								"url": {
-									"raw": "{{api_v1}}/admin/uploads",
-									"host": ["{{api_v1}}"],
-									"path": ["admin", "uploads"]
-								}
-							},
-							"response": []
-						}
-					]
-				}
-			]
-		}
-	],
-	"event": [
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					"// Collection-level test: Log error messages",
-					"if (pm.response.code >= 400) {",
-					"    try {",
-					"        const jsonData = pm.response.json();",
-					"        if (jsonData.success === false && jsonData.message) {",
-					"            console.log('Error:', jsonData.message);",
-					"            if (jsonData.errors) {",
-					"                console.log('Errors:', JSON.stringify(jsonData.errors, null, 2));",
-					"            }",
-					"        }",
-					"    } catch (e) {",
-					"        // Not JSON response",
-					"    }",
-					"}"
-				]
-			}
-		}
-	],
-	"variable": []
+  "info": {
+    "_postman_id": "scts-institute-api-collection",
+    "name": "SCTS Institute API",
+    "description": "Complete API collection for SCTS Institute backend. Import this along with an environment file (Local/Staging/Production).\n\n**Variables**: Uses `{{baseUrl}}` for the API root. Set environment-specific values in the selected environment.\n\n**Auth**: Run Login request to save `accessToken` and `refreshToken` automatically. Bearer tokens are configured at folder level for protected routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Server",
+      "item": [
+        {
+          "name": "Root / Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/"
+          }
+        },
+        {
+          "name": "API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/health"
+          }
+        },
+        {
+          "name": "OpenAPI JSON",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/openapi.json"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public API",
+      "item": [
+        {
+          "name": "Home — Hero slides",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/home/hero-slides"
+          }
+        },
+        {
+          "name": "Home — Mobile slides",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/home/mobile-slides"
+          }
+        },
+        {
+          "name": "Services — List active",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/services"
+          }
+        },
+        {
+          "name": "Services — Get by slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/services/{{serviceSlug}}"
+          }
+        },
+        {
+          "name": "Certification — List active",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certification"
+          }
+        },
+        {
+          "name": "Certification — Get by slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certification/{{certSlug}}"
+          }
+        },
+        {
+          "name": "Courses — List active",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/courses"
+          }
+        },
+        {
+          "name": "Courses — Get by slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseSlug}}"
+          }
+        },
+        {
+          "name": "Partners — List active",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/partners"
+          }
+        },
+        {
+          "name": "Partners — All (public endpoint)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/partners/public"
+          }
+        },
+        {
+          "name": "Pages — Get by key",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/pages/{{pageKey}}"
+          }
+        },
+        {
+          "name": "Contact — Submit form",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"phone\": \"+962 790 000 000\",\n  \"subject\": \"Testing Contact\",\n  \"message\": \"This is a test message from Postman.\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/contact"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"email\": \"{{userEmail}}\",\n  \"phoneNumber\": \"+962 790 000 000\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/signup"
+          }
+        },
+        {
+          "name": "Login (saves tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.success && json.data) {",
+                  "    if (json.data.accessToken) pm.environment.set('accessToken', json.data.accessToken);",
+                  "    if (json.data.refreshToken) pm.environment.set('refreshToken', json.data.refreshToken);",
+                  "    console.log('✅ Tokens saved to environment');",
+                  "  }",
+                  "} catch (e) { console.error('Failed to parse response:', e); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Refresh token (updates accessToken)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json.success && json.data && json.data.accessToken) {",
+                  "    pm.environment.set('accessToken', json.data.accessToken);",
+                  "    console.log('✅ Access token refreshed');",
+                  "  }",
+                  "} catch (e) { console.error('Failed to parse response:', e); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('accessToken', '');",
+                  "  pm.environment.set('refreshToken', '');",
+                  "  console.log('✅ Tokens cleared');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          }
+        },
+        {
+          "name": "Forgot password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/forgot-password"
+          }
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"otp\": \"123456\",\n  \"password\": \"NewPassword123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/reset-password"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Course Registrations (Protected)",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Register for course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"sessionDateKey\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/course-registrations/register"
+          }
+        },
+        {
+          "name": "My registrations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/course-registrations/my-registrations"
+          }
+        },
+        {
+          "name": "My registration for specific course",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/course-registrations/course/{{courseId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin (Protected)",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Hero Slides",
+          "item": [
+            {
+              "name": "List hero slides",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/hero-slides"
+              }
+            },
+            {
+              "name": "Get hero slide by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Create hero slide",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"image\",\n  \"title\": \"Welcome Slide\",\n  \"subtitle\": \"Excellence in training\",\n  \"mediaUrl\": \"/uploads/hero.jpg\",\n  \"buttonText\": \"Learn More\",\n  \"buttonLink\": \"/services\",\n  \"order\": 1,\n  \"isActive\": true\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/hero-slides"
+              }
+            },
+            {
+              "name": "Update hero slide",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Title\",\n  \"order\": 2\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Delete hero slide",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/hero-slides/{{mongoId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mobile Slides",
+          "item": [
+            {
+              "name": "List mobile slides",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/mobile-slides"
+              }
+            },
+            {
+              "name": "Get mobile slide by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/mobile-slides/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Create mobile slide (no action)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"نسكافيه الكبوس\",\n  \"body\": \"Special offer\",\n  \"images\": \"/uploads/slide-mobile.png\",\n  \"type\": null,\n  \"order\": 1,\n  \"isActive\": true\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/mobile-slides"
+              }
+            },
+            {
+              "name": "Create mobile slide (link to course)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"BLS Course Now Available\",\n  \"body\": \"Register today\",\n  \"images\": \"/uploads/bls-slide.png\",\n  \"type\": \"course\",\n  \"courseId\": \"{{courseId}}\",\n  \"order\": 1,\n  \"isActive\": true\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/mobile-slides"
+              }
+            },
+            {
+              "name": "Create mobile slide (link to certificate)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"ACLS Certification\",\n  \"body\": \"Get certified\",\n  \"images\": \"/uploads/acls-slide.png\",\n  \"type\": \"certificate\",\n  \"certificateId\": \"{{mongoId}}\",\n  \"order\": 2,\n  \"isActive\": true\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/mobile-slides"
+              }
+            },
+            {
+              "name": "Update mobile slide",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Title\",\n  \"order\": 3\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/mobile-slides/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Delete mobile slide",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/mobile-slides/{{mongoId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Services",
+          "item": [
+            {
+              "name": "List services",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/services"
+              }
+            },
+            {
+              "name": "Get service by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Create service (multipart)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "Training Services",
+                      "type": "text"
+                    },
+                    {
+                      "key": "shortDescription",
+                      "value": "Professional training for healthcare",
+                      "type": "text"
+                    },
+                    {
+                      "key": "fullDescription",
+                      "value": "Complete training program",
+                      "type": "text"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "innerImage",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "isActive",
+                      "value": "true",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/v1/admin/services"
+              }
+            },
+            {
+              "name": "Update service (multipart)",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "Updated Service",
+                      "type": "text"
+                    },
+                    {
+                      "key": "isActive",
+                      "value": "true",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Toggle service active",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}/active"
+              }
+            },
+            {
+              "name": "Delete service",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/services/{{mongoId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certification",
+          "item": [
+            {
+              "name": "List certifications",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/certification"
+              }
+            },
+            {
+              "name": "Get certification by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Create certification (multipart)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "ACLS Certification",
+                      "type": "text"
+                    },
+                    {
+                      "key": "shortDescription",
+                      "value": "Advanced cardiac life support",
+                      "type": "text"
+                    },
+                    {
+                      "key": "fullDescription",
+                      "value": "Full certification program",
+                      "type": "text"
+                    },
+                    {
+                      "key": "cardImage",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "heroImage",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "innerImage",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "isActive",
+                      "value": "true",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/v1/admin/certification"
+              }
+            },
+            {
+              "name": "Update certification (multipart)",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "Updated Certification",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Toggle certification active",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}/active"
+              }
+            },
+            {
+              "name": "Delete certification",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/certification/{{mongoId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Courses",
+          "item": [
+            {
+              "name": "List courses",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/courses?status=available",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "courses"],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "available",
+                      "disabled": true
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get course by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Create course (multipart)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "category",
+                      "value": "Life Support",
+                      "type": "text"
+                    },
+                    {
+                      "key": "title",
+                      "value": "BLS Course",
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "value": "Basic life support training",
+                      "type": "text"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "level",
+                      "value": "Beginner",
+                      "type": "text"
+                    },
+                    {
+                      "key": "duration",
+                      "value": "2 days",
+                      "type": "text"
+                    },
+                    {
+                      "key": "price",
+                      "value": "0",
+                      "type": "text"
+                    },
+                    {
+                      "key": "sessionTime",
+                      "value": "9:00 AM - 5:00 PM",
+                      "type": "text"
+                    },
+                    {
+                      "key": "location",
+                      "value": "Training Center, Amman",
+                      "type": "text"
+                    },
+                    {
+                      "key": "isAvailable",
+                      "value": "true",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/v1/admin/courses"
+              }
+            },
+            {
+              "name": "Update course (multipart)",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "Updated Course",
+                      "type": "text"
+                    },
+                    {
+                      "key": "price",
+                      "value": "150",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Toggle course availability",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}/toggle-availability"
+              }
+            },
+            {
+              "name": "Delete course",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/courses/{{mongoId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Partners",
+          "item": [
+            {
+              "name": "List partners",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/partners?activeOnly=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "admin", "partners"],
+                  "query": [
+                    {
+                      "key": "activeOnly",
+                      "value": "true",
+                      "disabled": true
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get partner by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/partners/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Create partner (multipart)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "Partner Organization",
+                      "type": "text"
+                    },
+                    {
+                      "key": "logo",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "websiteUrl",
+                      "value": "https://example.com",
+                      "type": "text"
+                    },
+                    {
+                      "key": "isActive",
+                      "value": "true",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/v1/admin/partners"
+              }
+            },
+            {
+              "name": "Update partner (multipart)",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "Updated Partner",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/v1/admin/partners/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Delete partner",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/partners/{{mongoId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Course Registrations (Admin)",
+          "item": [
+            {
+              "name": "List all registrations",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/course-registrations"
+              }
+            },
+            {
+              "name": "Update registration status",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"paid\",\n  \"notes\": \"Payment confirmed\"\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/course-registrations/{{registrationId}}/status"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pages & Content",
+          "item": [
+            {
+              "name": "List pages",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/pages"
+              }
+            },
+            {
+              "name": "Get page by key",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/pages/{{pageKey}}"
+              }
+            },
+            {
+              "name": "Update page content",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"About Us\",\n  \"contentJson\": {\n    \"sections\": []\n  }\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/pages/{{pageKey}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Contact Messages",
+          "item": [
+            {
+              "name": "List contact messages",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/contact-messages"
+              }
+            },
+            {
+              "name": "Get contact message by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/contact-messages/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Update message status",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"read\"\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/contact-messages/{{mongoId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Users",
+          "item": [
+            {
+              "name": "List users",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/users"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Broadcast Email",
+          "item": [
+            {
+              "name": "Send broadcast email",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"subject\": \"Newsletter Update\",\n  \"text\": \"Plain text version\",\n  \"html\": \"<p>HTML version</p>\",\n  \"includeAdmins\": false\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/broadcast-emails"
+              }
+            },
+            {
+              "name": "Broadcast email logs",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/broadcast-emails"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Uploads",
+          "item": [
+            {
+              "name": "Upload file (generic)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": "{{baseUrl}}/api/v1/admin/uploads"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
-
