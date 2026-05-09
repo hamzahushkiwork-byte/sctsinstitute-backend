@@ -81,6 +81,7 @@ export async function createCourse(req, res) {
     const availableDates = initialAvailableDates ?? [];
     const sessionTime = String(req.body.sessionTime || '').trim();
     const location = String(req.body.location || '').trim();
+    const price = req.body.price ? parseFloat(req.body.price) : 0;
 
     // Validate required fields
     if (!title) {
@@ -133,6 +134,7 @@ export async function createCourse(req, res) {
       availableDates,
       sessionTime,
       location,
+      price,
     };
 
     // Only add imageUrl if we have a file
@@ -252,6 +254,9 @@ export async function updateCourse(req, res) {
     }
     if (location !== undefined) {
       updateData.location = location;
+    }
+    if (req.body.price !== undefined) {
+      updateData.price = parseFloat(req.body.price) || 0;
     }
 
     const { dates: parsedAvailableDates } = parseAvailableDatesFromRequest(

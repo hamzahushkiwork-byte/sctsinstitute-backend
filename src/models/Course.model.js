@@ -58,6 +58,12 @@ const courseSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    /** Course price as a floating-point number. 0 or undefined = free course. */
+    price: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,

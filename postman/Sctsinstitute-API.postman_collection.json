@@ -55,6 +55,14 @@
           }
         },
         {
+          "name": "Home — Trending courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/home/trending-courses"
+          }
+        },
+        {
           "name": "Services — List active",
           "request": {
             "method": "GET",
@@ -524,6 +532,69 @@
           ]
         },
         {
+          "name": "Trending Courses",
+          "item": [
+            {
+              "name": "List trending courses",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/trending-courses"
+              }
+            },
+            {
+              "name": "Get trending course by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/trending-courses/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Add course to trending",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"order\": 1,\n  \"isActive\": true\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/trending-courses"
+              }
+            },
+            {
+              "name": "Update trending course",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"order\": 2,\n  \"isActive\": false\n}"
+                },
+                "url": "{{baseUrl}}/api/v1/admin/trending-courses/{{mongoId}}"
+              }
+            },
+            {
+              "name": "Remove course from trending",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/admin/trending-courses/{{mongoId}}"
+              }
+            }
+          ]
+        },
+        {
           "name": "Services",
           "item": [
             {
@@ -799,8 +870,9 @@
                     },
                     {
                       "key": "price",
-                      "value": "0",
-                      "type": "text"
+                      "value": "299.99",
+                      "type": "text",
+                      "description": "Course price (floating-point number, 0 = free)"
                     },
                     {
                       "key": "sessionTime",
@@ -837,8 +909,9 @@
                     },
                     {
                       "key": "price",
-                      "value": "150",
-                      "type": "text"
+                      "value": "349.50",
+                      "type": "text",
+                      "description": "Course price (floating-point number)"
                     }
                   ]
                 },

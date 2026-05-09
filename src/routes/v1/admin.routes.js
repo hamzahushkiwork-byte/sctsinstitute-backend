@@ -13,6 +13,7 @@ import servicesAdminRoutes from '../admin/services.routes.js';
 import certificationAdminRoutes from '../admin/certification.admin.routes.js';
 import coursesAdminRoutes from '../admin/courses.admin.routes.js';
 import mobileSlidesAdminRoutes from '../admin/mobileSlides.admin.routes.js';
+import trendingCoursesAdminRoutes from '../admin/trendingCourses.admin.routes.js';
 import { getUploadRoot } from '../../utils/uploadRoot.js';
 
 const router = express.Router();
@@ -121,6 +122,9 @@ router.use('/', certificationAdminRoutes);
 
 // Mobile Slides CRUD - Mount separate routes module
 router.use('/', mobileSlidesAdminRoutes);
+
+// Trending Courses CRUD - Mount separate routes module
+router.use('/', trendingCoursesAdminRoutes);
 
 // Page Content CRUD
 router.get('/pages', adminController.getAllPageContent);
