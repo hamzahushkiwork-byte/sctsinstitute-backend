@@ -14,6 +14,7 @@ import certificationAdminRoutes from '../admin/certification.admin.routes.js';
 import coursesAdminRoutes from '../admin/courses.admin.routes.js';
 import mobileSlidesAdminRoutes from '../admin/mobileSlides.admin.routes.js';
 import trendingCoursesAdminRoutes from '../admin/trendingCourses.admin.routes.js';
+import youtubeVideoAdminRoutes from '../admin/youtubeVideo.admin.routes.js';
 import { getUploadRoot } from '../../utils/uploadRoot.js';
 
 const router = express.Router();
@@ -125,6 +126,9 @@ router.use('/', mobileSlidesAdminRoutes);
 
 // Trending Courses CRUD - Mount separate routes module
 router.use('/', trendingCoursesAdminRoutes);
+
+// Youtube Videos CRUD - Mount separate routes module
+router.use('/', youtubeVideoAdminRoutes);
 
 // Page Content CRUD
 router.get('/pages', adminController.getAllPageContent);
